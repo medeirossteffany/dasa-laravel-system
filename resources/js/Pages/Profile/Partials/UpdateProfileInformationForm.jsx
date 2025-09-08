@@ -16,14 +16,14 @@ const cargoLabel = (id) => {
 
 export default function UpdateProfileInformation({ mustVerifyEmail, status, className = '' }) {
   const { auth, cargos } = usePage().props;
-  const user = auth.user;
+  const user = auth.user ?? {};
 
   const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
-    name: user.name ?? user.NOME_USUARIO,
-    email: user.email ?? user.EMAIL_USUARIO,
-    cargo_id: user.CARGO_ID_CARGO ?? '',  // se já existir
-    license_number: '',
-    license_state: '',
+    name: user.name ?? '',
+    email: user.email ?? '',
+    cargo_id: user.CARGO_ID_CARGO ?? '',
+    license_number: user.license_number ?? '',
+    license_state: user.license_state ?? '',
   });
 
   const submit = (e) => {
@@ -34,7 +34,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
   return (
     <section className={className}>
       <header>
-        <h2 className="text-lg font-medium text-gray-900">Profile Information</h2>
+        <h2 className="text-lg font-medium text-gray-900">Editar Perfil</h2>
         <p className="mt-1 text-sm text-gray-600">Atualize seus dados e seu registro profissional.</p>
       </header>
 
@@ -60,7 +60,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
           <InputLabel htmlFor="cargo_id" value="Cargo" />
           <select
             id="cargo_id"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600"
             value={data.cargo_id}
             onChange={(e) => setData('cargo_id', e.target.value)}
             required
@@ -82,7 +82,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
             value={data.license_number}
             onChange={(e) => setData('license_number', e.target.value)}
             required
-            placeholder={`Ex: 123456`}
+            placeholder="Ex: 123456"
           />
           <InputError className="mt-2" message={errors.license_number} />
         </div>
@@ -102,13 +102,13 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
           <InputError className="mt-2" message={errors.license_state} />
         </div>
 
-        {/* Verificação de email (sem mudanças) */}
+        {/* Verificação de email */}
         {mustVerifyEmail && user.email_verified_at === null && (
           <div>
             <p className="mt-2 text-sm text-gray-800">
               Seu email não está verificado.
               <Link href={route('verification.send')} method="post" as="button"
-                className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                className="ml-1 rounded-md text-sm text-blue-600 underline hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
                 Reenviar verificação.
               </Link>
             </p>
@@ -121,8 +121,16 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
         )}
 
         <div className="flex items-center gap-4">
-          <PrimaryButton disabled={processing}>Salvar</PrimaryButton>
-          <Transition show={recentlySuccessful} enter="transition ease-in-out" enterFrom="opacity-0" leave="transition ease-in-out" leaveTo="opacity-0">
+          {/* Botão AZUL */}
+          <PrimaryButton
+            className="bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+            disabled={processing}
+          >
+            Salvar
+          </PrimaryButton>
+
+          <Transition show={recentlySuccessful} enter="transition ease-in-out"
+            enterFrom="opacity-0" leave="transition ease-in-out" leaveTo="opacity-0">
             <p className="text-sm text-gray-600">Salvo.</p>
           </Transition>
         </div>
