@@ -166,9 +166,9 @@ function FeatureSection() {
                     Funcionalidades
                 </span>
                 <h2 className="text-3xl sm:text-5xl lg:text-6xl mt-10 lg:mt-20 tracking-wide">
-                    Facilmente construído{" "}
+                    Sobre o {" "}
                     <span className="bg-gradient-to-r from-blue-500 to-blue-800 text-transparent bg-clip-text">
-                        para desenvolvedores
+                        projeto
                     </span>
                 </h2>
             </div>
@@ -213,43 +213,37 @@ function WorkFlow() {
     return (
         <div id="tecnologia" className="mt-20">
             <h2 className="text-3xl sm:text-5xl lg:text-6xl text-center mt-6 tracking-wide">
-                Acelere seu{" "}
+                Tecnologias{" "}
                 <span className="bg-gradient-to-r from-blue-500 to-blue-800 text-transparent bg-clip-text">
-                    fluxo de trabalho de codificação.
+                    utilizadas.
                 </span>
             </h2>
-            <div className="flex flex-wrap justify-center">
-  <div className="p-2 w-full lg:w-1/2">
-    <video
-      className="rounded-lg w-full h-auto"
-      controls
-      // remova autoplay se não quiser iniciar sozinho
-      // autoPlay 
-      // muted 
-      // loop 
-      playsInline
-      onError={(e) => console.error('Erro ao carregar vídeo:', e)}
-    >
-      <source src="/videos/coding.mp4" type="video/mp4" />
-      Seu navegador não suporta a tag de vídeo.
-    </video>
-  </div>
-
-  <div className="pt-12 w-full lg:w-1/2">
-    {checklistItems.map((item, index) => (
-      <div key={index} className="flex mb-12">
-        <div className="text-green-400 mx-6 bg-neutral-900 h-10 w-10 p-2 flex justify-center items-center rounded-full">
-          <i className="bi bi-check-circle-fill"></i>
-        </div>
-        <div>
-          <h5 className="mt-1 mb-2 text-xl">{item.title}</h5>
-          <p className="text-md text-neutral-500">{item.description}</p>
-        </div>
-      </div>
-    ))}
-  </div>
-</div>
-
+            <div className="flex flex-wrap justify-center mt-8">
+            <div className="p-2 w-full lg:w-1/2">
+            <video
+                className="rounded-lg w-full h-auto lg:h-[400px]" 
+                controls
+                playsInline
+                onError={(e) => console.error('Erro ao carregar vídeo:', e)}
+            >
+                <source src="/videos/coding.mp4" type="video/mp4" />
+                Seu navegador não suporta a tag de vídeo.
+            </video>
+            </div>
+            <div className="pt-12 w-full lg:w-1/2">
+                {checklistItems.map((item, index) => (
+                <div key={index} className="flex mb-12">
+                    <div className="text-green-400 mx-6 bg-neutral-900 h-10 w-10 p-2 flex justify-center items-center rounded-full">
+                    <i className="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                    <h5 className="mt-1 mb-2 text-xl">{item.title}</h5>
+                    <p className="text-md text-neutral-500">{item.description}</p>
+                    </div>
+                </div>
+                ))}
+            </div>
+            </div>
         </div>
     );
 }
@@ -282,38 +276,57 @@ function Developers() {
 
     return (
         <div id="desenvolvedores" className="mt-20 tracking-wide">
-            <h2 className="text-3xl sm:text-5xl lg:text-6xl text-center my-10 lg:my-20">
-                O que as pessoas estão dizendo
-            </h2>
-            <div className="flex flex-wrap justify-center">
-                {developers.map((developer, index ) => (
-                    <div key={index} className="w-full sm:w-1/2 lg:w-1/3 px-4 py-2">
-                        <div className="bg-neutral-900 rounded-md p-6 text-md border border-neutral-800 font-thin">
-                            <p>{developer.description}</p>
-                            <div className="flex mt-8 items-start">
-                                <img
-                                    className="w-12 h-12 mr-6 rounded-full border border-neutral-300"
-                                    src={developer.image}
-                                    alt={developer.name}
-                                />
-                                <div>
-                                    <h6>{developer.name}</h6>
-                                    <div className="flex space-x-2 mt-2">
-                                        <a href={developer.github} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-400">
-                                            <i className="bi bi-github"></i>
-                                        </a>
-                                        <a href={developer.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-400">
-                                            <i className="bi bi-linkedin"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+          <h2 className="text-3xl sm:text-5xl lg:text-6xl text-center my-10 lg:my-20">
+            Desenvolvedores
+          </h2>
+      
+          <div className="flex flex-wrap justify-center">
+            {developers.map((developer, index) => (
+              <div
+                key={index}
+                className="w-full sm:w-1/2 lg:w-1/3 p-4 flex flex-col items-stretch"
+                data-aos="fade-up"
+                data-aos-delay={(index + 1) * 100}
+              >
+                <div className="bg-white dark:bg-neutral-800 rounded-md shadow-lg text-center overflow-hidden group relative h-full">
+                  <img
+                    src={developer.image}
+                    alt={developer.name}
+                    className="w-full h-[450px] object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="p-6">
+                    <h6 className="text-xl font-semibold mb-2">{developer.name}</h6>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      {developer.description}
+                    </p>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="flex space-x-4">
+                      <a
+                        href={developer.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white text-2xl hover:text-blue-500 transition-colors duration-300"
+                      >
+                        <i className="bi bi-github"></i>
+                      </a>
+                      <a
+                        href={developer.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white text-2xl hover:text-blue-500 transition-colors duration-300"
+                      >
+                        <i className="bi bi-linkedin"></i>
+                      </a>
                     </div>
-                ))}
-            </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-    );
+      );      
+      
 }
 
 // Componente Footer
