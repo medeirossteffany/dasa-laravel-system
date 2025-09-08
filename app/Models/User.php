@@ -9,20 +9,12 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-    // Nome da tabela
     protected $table = 'USUARIO';
-
-    // Nome da chave primária
     protected $primaryKey = 'ID_USUARIO';
-
-    // Se a PK não for auto incremento inteiro
     public $incrementing = true;
     protected $keyType = 'int';
-
-    // Se não tiver timestamps (created_at, updated_at)
     public $timestamps = false;
 
-    // Campos que podem ser preenchidos
     protected $fillable = [
         'NOME_USUARIO',
         'EMAIL_USUARIO',
@@ -30,15 +22,38 @@ class User extends Authenticatable
         'CARGO_ID_CARGO',
     ];
 
-    // Mapeia a coluna de senha
+    protected $hidden = [
+        'SENHA_USUARIO',
+    ];
+
+    // Faz com que 'id', 'name' e 'email' apareçam no JSON do user
+    protected $appends = ['id', 'name', 'email'];
+
+    // Laravel vai usar essa coluna para comparar a senha
     public function getAuthPassword()
     {
         return $this->SENHA_USUARIO;
     }
 
+    // Laravel vai usar essa coluna como identificador de login
     public function username()
-{
-    return 'EMAIL_USUARIO';
-}
+    {
+        return 'EMAIL_USUARIO';
+    }
 
+    // Aliases para funcionar igual ao padrão do Breeze
+    public function getIdAttribute()
+    {
+        return $this->attributes['ID_USUARIO'] ?? null;
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->attributes['NOME_USUARIO'] ?? null;
+    }
+
+    public function getEmailAttribute()
+    {
+        return $this->attributes['EMAIL_USUARIO'] ?? null;
+    }
 }
