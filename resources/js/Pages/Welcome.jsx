@@ -201,9 +201,9 @@ function WorkFlow() {
             description: "Desenvolvimento de uma interface responsiva, moderna e otimizada utilizando React para a estrutura e Tailwind CSS para o design eficiente e escalável.",
         },
         {
-            title: "Backend em Java com Spring Boot",
-            description: "Construção de um backend robusto com Java e Spring Boot, promovendo segurança, alta performance e arquitetura orientada a objetos, com persistência de dados em MySQL.",
-        },
+            title: "Backend em PHP com Laravel",
+            description: "Construção de um backend robusto com PHP e Laravel, promovendo segurança, alta performance e arquitetura orientada a objetos, com persistência de dados em MySQL.",
+        },        
         {
             title: "Processamento de Imagem e Áudio com Python",
             description: "Implementação de visão computacional com a biblioteca OpenCV para análise de imagens, e transcrição de áudio em texto utilizando a biblioteca SpeechRecognition.",
@@ -280,7 +280,7 @@ function Developers() {
     ];
 
     return (
-    <div id="desenvolvedores" className="mt-20 px-6 sm:px-12 lg:px-20 py-12 tracking-wide">
+    <div id="desenvolvedores" className="mt-8 px-6 sm:px-12 lg:px-20 py-12 tracking-wide">
         <h2 className="text-3xl sm:text-5xl lg:text-6xl text-center mb-10 lg:mb-16">
             Desenvolvedores
         </h2>
