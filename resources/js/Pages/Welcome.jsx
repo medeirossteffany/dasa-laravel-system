@@ -145,12 +145,12 @@ function FeatureSection() {
         {
             icon: <i className="bi bi-browser-chrome text-xl"></i>,
             text: "Interface Web Intuitiva",
-            description: "Plataforma web desenvolvida em React, proporcionando uma experiência de uso amigável e intuitiva para gestão de pacientes e análises.",
+            description: "Plataforma web desenvolvida em React e Larevel, proporcionando uma experiência de uso amigável e intuitiva para gestão de pacientes e análises.",
         },
         {
             icon: <i className="bi bi-database-fill-check text-xl"></i>,
             text: "Integração com Banco de Dados",
-            description: "Registro automático de históricos de pacientes e integração com sistemas hospitalares para consulta rápida e segura.",
+            description: "Banco de dados para registro automatizado de históricos de pacientes, amostras e receitas, integrado a um sistema Python de visão computacional e IA.",
         },
         {
             icon: <i className="bi bi-clipboard-data-fill text-xl"></i>,
@@ -218,18 +218,23 @@ function WorkFlow() {
                     utilizadas.
                 </span>
             </h2>
-            <div className="flex flex-wrap justify-center mt-8">
-            <div className="p-2 w-full lg:w-1/2">
-            <video
-                className="rounded-lg w-full h-auto lg:h-[400px]" 
-                controls
-                playsInline
-                onError={(e) => console.error('Erro ao carregar vídeo:', e)}
-            >
-                <source src="/videos/coding.mp4" type="video/mp4" />
-                Seu navegador não suporta a tag de vídeo.
-            </video>
+            <div className="flex flex-wrap justify-center mt-5">
+            <div className="relative w-full lg:max-w-md mt-10">
+                <div className="aspect-[3/3]">
+                    <video
+                    className="rounded-lg w-full h-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    >
+                    <source src="/videos/coding.mp4" type="video/mp4" />
+                    Seu navegador não suporta a tag de vídeo.
+                    </video>
+                </div>
             </div>
+
+
             <div className="pt-12 w-full lg:w-1/2">
                 {checklistItems.map((item, index) => (
                 <div key={index} className="flex mb-12">
@@ -275,56 +280,49 @@ function Developers() {
     ];
 
     return (
-        <div id="desenvolvedores" className="mt-20 tracking-wide">
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl text-center my-10 lg:my-20">
+    <div id="desenvolvedores" className="mt-20 px-6 sm:px-12 lg:px-20 py-12 tracking-wide">
+        <h2 className="text-3xl sm:text-5xl lg:text-6xl text-center mb-10 lg:mb-16">
             Desenvolvedores
-          </h2>
-      
-          <div className="flex flex-wrap justify-center">
-            {developers.map((developer, index) => (
-              <div
-                key={index}
-                className="w-full sm:w-1/2 lg:w-1/3 p-4 flex flex-col items-stretch"
-                data-aos="fade-up"
-                data-aos-delay={(index + 1) * 100}
-              >
-                <div className="bg-white dark:bg-neutral-800 rounded-md shadow-lg text-center overflow-hidden group relative h-full">
-                  <img
-                    src={developer.image}
-                    alt={developer.name}
-                    className="w-full h-[450px] object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="p-6">
-                    <h6 className="text-xl font-semibold mb-2">{developer.name}</h6>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      {developer.description}
-                    </p>
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="flex space-x-4">
-                      <a
-                        href={developer.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-white text-2xl hover:text-blue-500 transition-colors duration-300"
-                      >
-                        <i className="bi bi-github"></i>
-                      </a>
-                      <a
-                        href={developer.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-white text-2xl hover:text-blue-500 transition-colors duration-300"
-                      >
-                        <i className="bi bi-linkedin"></i>
-                      </a>
-                    </div>
-                  </div>
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {developers.map((developer, index) => (
+            <div
+            key={index}
+            className="flex flex-col items-stretch"
+            data-aos="fade-up"
+            data-aos-delay={(index + 1) * 100}
+            >
+            <div className="bg-white dark:bg-neutral-800 rounded-md shadow-lg text-center overflow-hidden group relative h-full">
+                <img
+                src={developer.image}
+                alt={developer.name}
+                className="w-full h-[400px] object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="p-6">
+                <h6 className="text-xl font-semibold mb-2">{developer.name}</h6>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {developer.description}
+                </p>
                 </div>
-              </div>
-            ))}
-          </div>
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="flex space-x-4">
+                    <a href={developer.github} target="_blank" rel="noopener noreferrer"
+                    className="text-white text-2xl hover:text-blue-500 transition-colors duration-300">
+                    <i className="bi bi-github"></i>
+                    </a>
+                    <a href={developer.linkedin} target="_blank" rel="noopener noreferrer"
+                    className="text-white text-2xl hover:text-blue-500 transition-colors duration-300">
+                    <i className="bi bi-linkedin"></i>
+                    </a>
+                </div>
+                </div>
+            </div>
+            </div>
+        ))}
         </div>
+    </div>
+
       );      
       
 }
