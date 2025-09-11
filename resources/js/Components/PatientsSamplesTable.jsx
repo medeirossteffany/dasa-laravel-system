@@ -1,4 +1,5 @@
 // resources/js/Components/PatientsSamplesTable.jsx
+import { router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 function classNames(...c) { return c.filter(Boolean).join(' ') }
@@ -103,15 +104,14 @@ export default function PatientsSamplesTable({ rows = [], onNewSample }) {
   return (
     <div className="p-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={onNewSample}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
-          >
-            + Nova amostra
-          </button>
-
+        <div className="flex gap-2"> 
+        <button
+          type="button"
+          onClick={() => router.post(route('microscopio.run'))}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
+        >
+          + Nova amostra
+        </button>
           <button
             type="button"
             onClick={exportCSV}

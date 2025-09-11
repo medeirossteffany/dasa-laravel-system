@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MicroscopioController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -25,6 +26,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::post('/microscopio/run', [MicroscopioController::class, 'run'])->name('microscopio.run');
 });
+
 
 require __DIR__.'/auth.php';
