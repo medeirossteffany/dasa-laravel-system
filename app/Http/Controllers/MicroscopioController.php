@@ -10,18 +10,11 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class MicroscopioController extends Controller
 {
-    /**
-     * Dispara o script Python do microscópio passando o usuário autenticado.
-     * - Modo normal: assíncrono (não bloqueia a requisição).
-     * - Modo diagnóstico: adicionar ?diag=1 para rodar sincronamente e retornar stdout/stderr.
-     */
     public function run(Request $request)
     {
         try {
-            // 1) Usuário autenticado
             $user = Auth::user();
 
-            // Logs úteis no console (stderr) e no laravel.log
             Log::channel('stderr')->debug('[Microscopio] Auth user', ['user' => $user]);
             Log::debug('[Microscopio] Auth user', ['user' => $user]);
 
@@ -29,7 +22,6 @@ class MicroscopioController extends Controller
                 return back()->withErrors('Você precisa estar logado.');
             }
 
-            // Ajuste aqui se seus campos têm outros nomes
             $userId   = $user->id ?? $user->ID_USUARIO ?? null;
             $userName = $user->name ?? $user->NOME_USUARIO ?? 'Usuário';
 
@@ -42,39 +34,29 @@ class MicroscopioController extends Controller
                 return back()->withErrors('Não foi possível determinar o ID do usuário autenticado.');
             }
 
-            // 2) Caminho do script Python
-            // Mova seu microscopio.py para esse local do projeto (ou ajuste a linha abaixo)
             $script = base_path('app/Http/Scripts/microscopio.py');
             if (!file_exists($script)) {
                 Log::error("[Microscopio] Script não encontrado: {$script}");
                 return back()->withErrors("Script não encontrado em {$script}");
             }
 
-            // 3) Descobrir Python (ajuste se necessário)
             $python = $this->resolvePythonPath();
             if (!$python) {
                 return back()->withErrors('Python 3 não encontrado. Ajuste o caminho no controller.');
             }
 
-            // 4) Variáveis de ambiente pro Python
             $env = array_merge($_ENV, [
                 'AUTH_USER_ID'   => (string) $userId,
                 'AUTH_USER_NAME' => (string) $userName,
-                // Se quiser sobrepor credenciais de DB aqui:
-                // 'DB_HOST' => config('database.connections.mysql.host'),
-                // 'DB_USER' => config('database.connections.mysql.username'),
-                // 'DB_PASSWORD' => config('database.connections.mysql.password'),
-                // 'DB_NAME' => config('database.connections.mysql.database'),
             ]);
 
-            // 5) Comando
             $cmd = [$python, $script];
             $workdir = base_path();
 
-            // Modo diagnóstico? (sincrono, mostra stdout/err no retorno)
             if ($request->boolean('diag')) {
                 $process = new Process($cmd, $workdir, $env);
-                $process->setTimeout(20); // 20s
+                $process->setTimeout(null);
+                $process->setIdleTimeout(null);
                 $process->run();
 
                 $out = $process->getOutput();
@@ -90,27 +72,37 @@ class MicroscopioController extends Controller
                 return back()->with('success', "Python OK (diag):\n$out");
             }
 
-            // 6) Modo normal (assíncrono) + logs em arquivo
+            $logDir = storage_path('logs');
+            if (!is_dir($logDir)) {
+                @mkdir($logDir, 0775, true);
+            }
             $logFile = storage_path('logs/microscopio.out.log');
             $errFile = storage_path('logs/microscopio.err.log');
 
-            $process = new Process($cmd, $workdir, $env, null, null);
-            $process->start();
+            $cmdline = sprintf(
+                'nohup %s %s >> %s 2>> %s & echo $!',
+                escapeshellarg($python),
+                escapeshellarg($script),
+                escapeshellarg($logFile),
+                escapeshellarg($errFile)
+            );
 
-            // Captura buffers iniciais para arquivo (não bloqueia)
-            $process->waitUntil(function ($type, $buffer) use ($logFile, $errFile) {
-                if ($type === Process::OUT) {
-                    file_put_contents($logFile, $buffer, FILE_APPEND);
-                } else {
-                    file_put_contents($errFile, $buffer, FILE_APPEND);
-                }
-                // sempre continue (não bloqueia)
-                return false;
-            });
+            $process = Process::fromShellCommandline($cmdline, $workdir, $env);
+            $process->setTimeout(10);
+            $process->setIdleTimeout(null);
+            $process->run();
 
-            Log::info("[Microscopio] Disparado com PID {$process->getPid()} para usuário {$userId} - {$userName}");
+            if (!$process->isSuccessful()) {
+                $err = $process->getErrorOutput();
+                $out = $process->getOutput();
+                Log::error("[Microscopio] Falha ao spawnar nohup", ['err' => $err, 'out' => $out]);
+                return back()->withErrors("Falha ao iniciar em background: \n$err\n$out");
+            }
 
-            return back()->with('success', 'Microscópio iniciado. Verifique a janela do app e os logs em storage/logs/microscopio.*.log');
+            $pid = trim($process->getOutput());
+            Log::info("[Microscopio] Disparado em background (nohup) com PID {$pid} para usuário {$userId} - {$userName}");
+
+            return back()->with('success', 'Microscópio iniciado em background. Veja os logs em storage/logs/microscopio.*.log');
 
         } catch (ProcessFailedException $e) {
             Log::error('[Microscopio] Falha no processo: '.$e->getMessage());
@@ -121,28 +113,23 @@ class MicroscopioController extends Controller
         }
     }
 
-    /**
-     * Tenta resolver o caminho do python3 em ambientes comuns de macOS.
-     */
     private function resolvePythonPath(): ?string
     {
-        // 1) Prioriza o Python do venv do projeto
         $venvPython = base_path('.venv/bin/python');
         if (is_executable($venvPython)) {
             return $venvPython;
         }
-    
-        // 2) Demais caminhos comuns no macOS
+
         $candidates = [
-            '/opt/homebrew/bin/python3', // Apple Silicon (Homebrew)
-            '/usr/local/bin/python3',    // Intel (Homebrew)
-            '/usr/bin/python3',          // Sistema
-            'python3',                   // PATH (último recurso)
+            '/opt/homebrew/bin/python3', 
+            '/usr/local/bin/python3',    
+            '/usr/bin/python3',          
+            'python3',                  
         ];
-    
+
         foreach ($candidates as $p) {
             if ($p === 'python3') {
-                return $p;
+                return $p; 
             }
             if (is_executable($p)) {
                 return $p;
@@ -150,6 +137,4 @@ class MicroscopioController extends Controller
         }
         return null;
     }
-    
-
 }

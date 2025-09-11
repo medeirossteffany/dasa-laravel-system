@@ -48,9 +48,6 @@ def buscar_paciente_por_cpf(conexao, cpf_str):
 
 def inserir_print(conexao, frame_limpo, id_usuario_logado, mm_per_pixel_x, mm_per_pixel_y,
                   anotacao_medico, gemini_result, paciente_id=None):
-    import cv2
-    import datetime
-    import numpy as np
 
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"captura_{timestamp}.png"
@@ -159,9 +156,9 @@ class MicroscopioApp:
         self.captura_frame = tk.Frame(self.root)
         self.captura_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        tk.Label(self.captura_frame, text=f"Médico: {self.nome_usuario} (ID {self.id_usuario_logado})").grid(row=0, column=0, sticky="w", pady=(0, 10))
+        tk.Label(self.captura_frame, text=f"Profissional Saúde: {self.nome_usuario}").grid(row=0, column=0, sticky="w", pady=(0, 10))
 
-        tk.Label(self.captura_frame, text="Observação do médico:").grid(row=1, column=0, sticky="w", pady=(0, 5))
+        tk.Label(self.captura_frame, text="Observação").grid(row=1, column=0, sticky="w", pady=(0, 5))
         self.anotacao_entry = tk.Entry(self.captura_frame, width=60)
         self.anotacao_entry.grid(row=2, column=0, sticky="w", pady=(0, 15))
 
@@ -303,9 +300,9 @@ class MicroscopioApp:
         gemini_result = ""
         if largura_mm and altura_mm and margem_ok is not None:
             gemini_result = analisar_com_gemini(largura_mm, altura_mm, margem_ok, gemini_obs, amostra_retirada)
-            messagebox.showinfo("Análise Gemini", gemini_result)
-        else:
-            messagebox.showwarning("Análise Gemini", "Dados insuficientes para análise automática.")
+            # messagebox.showinfo("Análise Gemini", gemini_result)
+        # else:
+        #     messagebox.showwarning("Análise Gemini", "Dados insuficientes para análise automática.")
 
         messagebox.showinfo("Captura", "Imagem capturada e salva com sucesso!")
         self.garantir_conexao()
