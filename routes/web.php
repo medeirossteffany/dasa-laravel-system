@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MicroscopioController;
+use App\Http\Controllers\AmostraController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -28,6 +29,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::post('/microscopio/run', [MicroscopioController::class, 'run'])->name('microscopio.run');
+
+    Route::get('/amostras', [AmostraController::class, 'index'])->name('amostras.index');
 });
 
 

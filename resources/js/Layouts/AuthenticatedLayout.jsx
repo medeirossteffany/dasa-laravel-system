@@ -31,6 +31,15 @@ export default function AuthenticatedLayout({ header, children }) {
                                     Pacientes
                                 </NavLink>
                             </div>
+
+                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink
+                                    href={route('amostras.index')}
+                                    active={route().current('amostras.index')}
+                                >
+                                    Amostras
+                                </NavLink>
+                            </div>
                         </div>
 
                         <div className="hidden sm:ms-6 sm:flex sm:items-center">
