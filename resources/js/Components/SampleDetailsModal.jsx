@@ -1,22 +1,18 @@
 import React from 'react';
 
 /**
- * SampleDetailsModal
- * - mantém todos os campos originais (em grid 2 colunas)
- * - Anotação IA ocupa 2 colunas (mais larga)
- * - Imagem ocupa 2 colunas abaixo (mesma largura da anotação IA)
- * - tenta usar sample.IMAGEM_URL (data URL) ou fallback para /amostras/{id}/imagem
- * - se você usar Ziggy, substitua getImageRoute por route('amostras.imagem', sample.ID_AMOSTRA)
+ * SampleDetailsModal organizado em:
+ *  - Seção: Informações do Paciente (somente campos do paciente)
+ *  - Seção: Informações da Amostra (campos da amostra, anotação IA em largura total, imagem em largura total)
+ *
+ * Usa getImageRoute fallback para /amostras/{id}/imagem (substitua por Ziggy route() se usar).
  */
 
 function getImageRoute(id) {
-  // Se você tiver Ziggy e helper route disponível no window:
   if (typeof route === 'function') {
     try {
       return route('amostras.imagem', id);
-    } catch (e) {
-      // fallback
-    }
+    } catch (e) {}
   }
   return `/amostras/${id}/imagem`;
 }
@@ -24,17 +20,19 @@ function getImageRoute(id) {
 export default function SampleDetailsModal({ open, onClose, sample = {} }) {
   if (!open) return null;
 
-  // mantemos os campos exceto ANOTACAO_IA para renderizar separado
-  const fields = [
+  const patientFields = [
+    ['ID Paciente', 'ID_PACIENTE'],
+    ['Paciente', 'NOME_PACIENTE'],
+    ['CPF', 'CPF_PACIENTE'],
+  ];
+
+  const sampleFields = [
     ['ID Amostra', 'ID_AMOSTRA'],
     ['Data', 'DATA_AMOSTRA'],
     ['Altura', 'ALTURA_AMOSTRA'],
     ['Largura', 'LARGURA_AMOSTRA'],
     ['Espessura', 'ESPESSURA'],
     ['Anotação Médico', 'ANOTACAO_MEDICO_AMOSTRA'],
-    ['ID Paciente', 'ID_PACIENTE'],
-    ['Paciente', 'NOME_PACIENTE'],
-    ['CPF', 'CPF_PACIENTE'],
   ];
 
   const imageSrc = sample.IMAGEM_URL
@@ -59,45 +57,69 @@ export default function SampleDetailsModal({ open, onClose, sample = {} }) {
         </div>
 
         {/* Conteúdo rolável */}
-        <div className="max-h-[80vh] overflow-y-auto px-6 py-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            {fields.map(([label, key]) => (
-              <div key={key} className="space-y-1">
-                <div className="text-xs font-medium text-gray-500">{label}</div>
-                <div className="whitespace-pre-wrap break-words text-sm text-gray-800 border rounded p-2 bg-gray-50">
-                  {sample[key] ?? '—'}
+        <div className="max-h-[80vh] overflow-y-auto px-6 py-4 space-y-6">
+          {/* Seção: Informações do Paciente */}
+          <section>
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-gray-700">Informações do Paciente</h4>
+            </div>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              {patientFields.map(([label, key]) => (
+                <div key={key} className="space-y-1">
+                  <div className="text-xs font-medium text-gray-500">{label}</div>
+                  <div className="text-sm text-gray-800 border rounded p-2 bg-gray-50 whitespace-pre-wrap break-words">
+                    {sample[key] ?? '—'}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </section>
 
-            {/* Anotação IA ocupa as duas colunas e é mais larga */}
-            <div className="sm:col-span-2 space-y-1">
-              <div className="text-xs font-medium text-gray-500">Anotação IA</div>
-              <div className="whitespace-pre-wrap break-words text-sm text-gray-800 border rounded p-3 bg-gray-50 min-h-[4rem]">
-                {sample.ANOTACAO_IA_AMOSTRA ?? '—'}
-              </div>
+          <hr className="border-gray-100" />
+
+          {/* Seção: Informações da Amostra */}
+          <section>
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-gray-700">Informações da Amostra</h4>
             </div>
 
-            {/* Imagem ocupa as duas colunas, mesma largura */}
-            <div className="sm:col-span-2 space-y-1">
-              <div className="text-xs font-medium text-gray-500">Imagem da amostra</div>
-
-              {imageSrc ? (
-                <div className="mt-2 flex justify-center">
-                  <img
-                    src={imageSrc}
-                    alt={`Amostra ${sample.ID_AMOSTRA || ''}`}
-                    className="w-full rounded border object-contain"
-                    style={{ maxHeight: '520px' }}
-                    // adiciona loading lazy para performance
-                    loading="lazy"
-                  />
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              {sampleFields.map(([label, key]) => (
+                <div key={key} className="space-y-1">
+                  <div className="text-xs font-medium text-gray-500">{label}</div>
+                  <div className="text-sm text-gray-800 border rounded p-2 bg-gray-50 whitespace-pre-wrap break-words">
+                    {sample[key] ?? '—'}
+                  </div>
                 </div>
-              ) : (
-                <div className="mt-2 text-sm text-gray-600">Nenhuma imagem disponível</div>
-              )}
+              ))}
+
+              {/* Anotação IA em largura total */}
+              <div className="sm:col-span-2 space-y-1">
+                <div className="text-xs font-medium text-gray-500">Anotação IA</div>
+                <div className="text-sm text-gray-800 border rounded p-3 bg-gray-50 whitespace-pre-wrap break-words min-h-[4rem]">
+                  {sample.ANOTACAO_IA_AMOSTRA ?? '—'}
+                </div>
+              </div>
+
+              {/* Imagem em largura total, abaixo da anotação IA */}
+              <div className="sm:col-span-2 space-y-1">
+                <div className="text-xs font-medium text-gray-500">Imagem da amostra</div>
+                {imageSrc ? (
+                  <div className="mt-2 flex justify-center">
+                    <img
+                      src={imageSrc}
+                      alt={`Amostra ${sample.ID_AMOSTRA || ''}`}
+                      className="w-full rounded border object-contain"
+                      style={{ maxHeight: '520px' }}
+                      loading="lazy"
+                    />
+                  </div>
+                ) : (
+                  <div className="mt-2 text-sm text-gray-600">Nenhuma imagem disponível</div>
+                )}
+              </div>
             </div>
-          </div>
+          </section>
         </div>
 
         {/* Rodapé fixo */}
