@@ -34,7 +34,7 @@ class MicroscopioController extends Controller
                 return back()->withErrors('Não foi possível determinar o ID do usuário autenticado.');
             }
 
-            $script = base_path('app/Http/Scripts/microscopio.py');
+            $script = base_path('app/Http/Scripts/main.py');
             if (!file_exists($script)) {
                 Log::error("[Microscopio] Script não encontrado: {$script}");
                 return back()->withErrors("Script não encontrado em {$script}");
@@ -121,17 +121,32 @@ class MicroscopioController extends Controller
         }
 
         $candidates = [
-            '/opt/homebrew/bin/python3', 
-            '/usr/local/bin/python3',    
-            '/usr/bin/python3',          
-            'python3',                  
+            // Unix/macOS
+            '/opt/homebrew/bin/python3',
+            '/usr/local/bin/python3',
+            '/usr/bin/python3',
+            // Windows padrão
+            'C:\\Python311\\python.exe',
+            'C:\\Python310\\python.exe',
+            'C:\\Python39\\python.exe',
+            'C:\\Python38\\python.exe',
+            // Seu Python instalado
+            'C:\\Users\\gusta\\AppData\\Local\\Programs\\Python\\Python313\\python.exe',
+            'C:\\Users\\gusta\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\python.exe',
+            // PATH
+            'python',
+            'python3',
         ];
 
         foreach ($candidates as $p) {
-            if ($p === 'python3') {
-                return $p; 
-            }
-            if (is_executable($p)) {
+            if ($p === 'python' || $p === 'python3') {
+                $output = [];
+                $ret = null;
+                @exec("$p --version", $output, $ret);
+                if ($ret === 0) {
+                    return $p;
+                }
+            } else if (is_executable($p)) {
                 return $p;
             }
         }
