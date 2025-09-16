@@ -31,6 +31,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/microscopio/run', [MicroscopioController::class, 'run'])->name('microscopio.run');
 
     Route::get('/amostras', [AmostraController::class, 'index'])->name('amostras.index');
+    Route::get('/amostras/{id}', [AmostraController::class, 'show'])->name('amostras.show');
+    Route::get('/amostras/{id}/imagem', [AmostraController::class, 'imagem'])->name('amostras.imagem');
+
+
 });
 
 

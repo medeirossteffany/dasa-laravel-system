@@ -1,6 +1,7 @@
 // resources/js/Components/SamplesTable.jsx
 import { useMemo, useState } from 'react';
 import { router } from '@inertiajs/react';
+import SampleDetailsModal from './SampleDetailsModal';
 
 function classNames(...c) { return c.filter(Boolean).join(' ') }
 
@@ -20,6 +21,8 @@ export default function SamplesTable({ rows = [] }) {
   const [sort, setSort] = useState({ key: 'DATA_AMOSTRA', dir: 'desc' });
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedSample, setSelectedSample] = useState(null);
 
   const headers = [
     { key: 'NOME_PACIENTE', label: 'Paciente' },
@@ -98,6 +101,11 @@ export default function SamplesTable({ rows = [] }) {
     URL.revokeObjectURL(a.href);
   }
 
+  function openDetails(sample) {
+    setSelectedSample(sample);
+    setModalOpen(true);
+  }
+
   return (
     <div className="p-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -131,7 +139,6 @@ export default function SamplesTable({ rows = [] }) {
         </div>
       </div>
 
-      {/* resto da tabela igual */}
       <div className="overflow-x-auto rounded-xl border">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -173,6 +180,17 @@ export default function SamplesTable({ rows = [] }) {
                 <td className="px-4 py-3 max-w-[28rem] truncate" title={r.ANOTACAO_IA_AMOSTRA || ''}>
                   {r.ANOTACAO_IA_AMOSTRA}
                 </td>
+                <td className="px-4 py-3">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openDetails(r)} 
+                      className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50"
+                      title="Ver detalhes"
+                    >
+                      Detalhes
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -200,6 +218,12 @@ export default function SamplesTable({ rows = [] }) {
           </button>
         </div>
       </div>
+
+      <SampleDetailsModal
+        open={modalOpen}
+        onClose={() => { setModalOpen(false); setSelectedSample(null); }}
+        sample={selectedSample || {}}
+      />
     </div>
   );
 }
