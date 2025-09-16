@@ -33,6 +33,7 @@ export default function SamplesTable({ rows = [] }) {
     { key: 'ESPESSURA', label: 'Espessura' },
     { key: 'ANOTACAO_MEDICO_AMOSTRA', label: 'Anotação Médico' },
     { key: 'ANOTACAO_IA_AMOSTRA', label: 'Anotação IA' },
+    { key: 'DETALHES', label: 'Detalhes' },
   ];
 
   function toggleSort(key) {

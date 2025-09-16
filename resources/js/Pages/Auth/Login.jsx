@@ -74,18 +74,6 @@ export default function Login({ status, canResetPassword }) {
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
-                <div className="flex items-center">
-                    <Checkbox
-                        name="remember"
-                        checked={data.remember}
-                        onChange={(e) => setData('remember', e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="remember" className="ml-3 text-sm text-gray-600 cursor-pointer">
-                        Lembrar de mim
-                    </label>
-                </div>
-
                 <div className="flex flex-col space-y-4">
                     <button 
                         type="submit"

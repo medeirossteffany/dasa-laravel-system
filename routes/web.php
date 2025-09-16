@@ -33,8 +33,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/amostras', [AmostraController::class, 'index'])->name('amostras.index');
     Route::get('/amostras/{id}', [AmostraController::class, 'show'])->name('amostras.show');
     Route::get('/amostras/{id}/imagem', [AmostraController::class, 'imagem'])->name('amostras.imagem');
-
-
 });
 
 

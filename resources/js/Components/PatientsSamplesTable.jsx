@@ -1,6 +1,7 @@
 // resources/js/Components/PatientsSamplesTable.jsx
 import { router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import SampleDetailsModal from './SampleDetailsModal';
 
 function classNames(...c) { return c.filter(Boolean).join(' ') }
 
@@ -17,11 +18,12 @@ function normalize(str = '') {
 }
 
 export default function PatientsSamplesTable({ rows = [], onNewSample }) {
-  // rows esperado: [{ ID_PACIENTE, NOME_PACIENTE, CPF_PACIENTE, ID_AMOSTRA, DATA_AMOSTRA, ALTURA_AMOSTRA, LARGURA_AMOSTRA, ESPESSURA, ANOTACAO_MEDICO_AMOSTRA, ANOTACAO_IA_AMOSTRA }]
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState({ key: 'DATA_AMOSTRA', dir: 'desc' });
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedSample, setSelectedSample] = useState(null);
 
   const headers = [
     { key: 'NOME_PACIENTE', label: 'Paciente' },
@@ -102,6 +104,11 @@ export default function PatientsSamplesTable({ rows = [], onNewSample }) {
     URL.revokeObjectURL(a.href);
   }
 
+  function openDetails(sample) {
+    setSelectedSample(sample);
+    setModalOpen(true);
+  }
+
   return (
     <div className="p-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -174,13 +181,23 @@ export default function PatientsSamplesTable({ rows = [], onNewSample }) {
                 <td className="px-4 py-3 max-w-[28rem] truncate" title={r.ANOTACAO_IA_AMOSTRA || ''}>
                   {r.ANOTACAO_IA_AMOSTRA}
                 </td>
+                <td className="px-4 py-3">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openDetails(r)} 
+                      className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50"
+                      title="Ver detalhes"
+                    >
+                      Detalhes
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* paginação simples */}
       <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
         <span>Total: {total}</span>
         <div className="flex items-center gap-2">
@@ -201,6 +218,12 @@ export default function PatientsSamplesTable({ rows = [], onNewSample }) {
           </button>
         </div>
       </div>
+
+      <SampleDetailsModal
+        open={modalOpen}
+        onClose={() => { setModalOpen(false); setSelectedSample(null); }}
+        sample={selectedSample || {}}
+      />
     </div>
   );
 }
