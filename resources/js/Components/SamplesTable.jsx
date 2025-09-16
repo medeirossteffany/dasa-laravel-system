@@ -2,6 +2,8 @@
 import { useMemo, useState } from 'react';
 import { router } from '@inertiajs/react';
 import SampleDetailsModal from './SampleDetailsModal';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 function classNames(...c) { return c.filter(Boolean).join(' ') }
 
@@ -78,28 +80,33 @@ export default function SamplesTable({ rows = [] }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
   const visible = sorted.slice((page - 1) * pageSize, page * pageSize);
 
-  function exportCSV() {
+  function exportPDF() {
+    const doc = new jsPDF();
+  
     const cols = ['Paciente','CPF','Data','Altura','Largura','Espessura','Anotação Médico','Anotação IA'];
-    const lines = [cols.join(';')];
-    sorted.forEach(r => {
-      const line = [
-        r.NOME_PACIENTE ?? '',
-        r.CPF_PACIENTE ?? '',
-        formatDate(r.DATA_AMOSTRA),
-        r.ALTURA_AMOSTRA ?? '',
-        r.LARGURA_AMOSTRA ?? '',
-        r.ESPESSURA ?? '',
-        (r.ANOTACAO_MEDICO_AMOSTRA ?? '').replace(/[\r\n]+/g,' '),
-        (r.ANOTACAO_IA_AMOSTRA ?? '').replace(/[\r\n]+/g,' '),
-      ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(';');
-      lines.push(line);
+  
+    const rows = sorted.map(r => [
+      r.NOME_PACIENTE ?? '',
+      r.CPF_PACIENTE ?? '',
+      formatDate(r.DATA_AMOSTRA),
+      r.ALTURA_AMOSTRA ?? '',
+      r.LARGURA_AMOSTRA ?? '',
+      r.ESPESSURA ?? '',
+      (r.ANOTACAO_MEDICO_AMOSTRA ?? '').replace(/[\r\n]+/g,' '),
+      (r.ANOTACAO_IA_AMOSTRA ?? '').replace(/[\r\n]+/g,' '),
+    ]);
+  
+    // USANDO autoTable corretamente
+    autoTable(doc, {
+      head: [cols],
+      body: rows,
+      startY: 20,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
     });
-    const blob = new Blob([`\ufeff${lines.join('\n')}`], { type: 'text/csv;charset=utf-8;' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `amostras_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+  
+    doc.text('Amostras', 14, 15);
+    doc.save(`amostras_${new Date().toISOString().slice(0,10)}.pdf`);
   }
 
   function openDetails(sample) {
@@ -121,12 +128,12 @@ export default function SamplesTable({ rows = [] }) {
           </button>
 
           <button
-            type="button"
-            onClick={exportCSV}
-            className="rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50"
-          >
-            Exportar Excel
-          </button>
+          type="button"
+          onClick={exportPDF}
+          className="rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50"
+        >
+          Exportar PDF
+        </button>
         </div>
 
         <div className="relative">
