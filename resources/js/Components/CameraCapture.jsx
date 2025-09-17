@@ -1,6 +1,9 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState} from 'react';
+import { usePage } from '@inertiajs/react';
 
 export default function CameraCapture({ onClose }) {
+  const { auth } = usePage().props;
+  const userId = auth?.user?.id;
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [stream, setStream] = useState(null);
@@ -96,6 +99,7 @@ export default function CameraCapture({ onClose }) {
       formData.append('gemini_obs', geminiObs || '');
       formData.append('amostra_retirada', amostraRetirada ? '1' : '0');
       formData.append('cpf', cpf || '');
+      formData.append('user_id', userId || '');
       const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   
       const res = await fetch('/microscopio/upload', {

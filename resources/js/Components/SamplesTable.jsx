@@ -174,34 +174,11 @@ export default function SamplesTable({ rows = [] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
-            {visible.map((r) => (
-              <tr key={`${r.ID_AMOSTRA ?? 'a'}-${r.ID_PACIENTE ?? 'np'}`}>
-                <td className="px-4 py-3">{r.NOME_PACIENTE || <span className="text-gray-400">sem paciente</span>}</td>
-                <td className="px-4 py-3">{r.CPF_PACIENTE || ''}</td>
-                <td className="px-4 py-3">{formatDate(r.DATA_AMOSTRA)}</td>
-                <td className="px-4 py-3">{r.ALTURA_AMOSTRA}</td>
-                <td className="px-4 py-3">{r.LARGURA_AMOSTRA}</td>
-                <td className="px-4 py-3">{r.ESPESSURA}</td>
-                <td className="px-4 py-3">{r.NOME_MEDICO || '—'}</td> {/* PROFISSIONAL */}
-                <td className="px-4 py-3 max-w-[28rem] truncate" title={r.ANOTACAO_MEDICO_AMOSTRA || ''}>
-                  {r.ANOTACAO_MEDICO_AMOSTRA || '—'}
-                </td>
-                <td className="px-4 py-3 max-w-[28rem] truncate" title={r.ANOTACAO_IA_AMOSTRA || ''}>
-                  {r.ANOTACAO_IA_AMOSTRA || '—'}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => openDetails(r)}
-                      className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50"
-                      title="Ver detalhes"
-                    >
-                      Detalhes
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+          {visible.map((r) => (
+            <tr key={`${r.ID_AMOSTRA ?? 'a'}-${r.ID_PACIENTE ?? 'np'}`}>
+              <td className="px-4 py-3">{r.NOME_PACIENTE || <span className="text-gray-400">sem paciente</span>}</td><td className="px-4 py-3">{r.CPF_PACIENTE || ''}</td><td className="px-4 py-3">{formatDate(r.DATA_AMOSTRA)}</td><td className="px-4 py-3">{r.ALTURA_AMOSTRA}</td><td className="px-4 py-3">{r.LARGURA_AMOSTRA}</td><td className="px-4 py-3">{r.ESPESSURA}</td><td className="px-4 py-3">{r.NOME_MEDICO || '—'}</td><td className="px-4 py-3 max-w-[28rem] truncate" title={r.ANOTACAO_MEDICO_AMOSTRA || ''}>{r.ANOTACAO_MEDICO_AMOSTRA || '—'}</td><td className="px-4 py-3 max-w-[28rem] truncate" title={r.ANOTACAO_IA_AMOSTRA || ''}>{r.ANOTACAO_IA_AMOSTRA || '—'}</td><td className="px-4 py-3"><div className="flex gap-2"><button onClick={() => openDetails(r)} className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50" title="Ver detalhes">Detalhes</button></div></td>
+            </tr>
+          ))}
           </tbody>
         </table>
       </div>

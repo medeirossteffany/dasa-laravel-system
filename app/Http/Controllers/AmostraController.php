@@ -23,6 +23,7 @@ class AmostraController extends Controller
                 a.ANOTACAO_MEDICO_AMOSTRA,
                 a.ANOTACAO_IA_AMOSTRA,
                 p.ID_PACIENTE,
+                p.DATA_NASC_PACIENTE,
                 p.NOME_PACIENTE,
                 p.CPF_PACIENTE,
                 u.NOME_USUARIO AS NOME_MEDICO
@@ -50,6 +51,7 @@ class AmostraController extends Controller
                 'a.IMAGEM_AMOSTRA',
                 'p.ID_PACIENTE',
                 'p.NOME_PACIENTE',
+                'p.DATA_NASC_PACIENTE',
                 'p.CPF_PACIENTE'
             )
             ->where('a.ID_AMOSTRA', $id)

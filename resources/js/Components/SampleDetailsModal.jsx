@@ -16,6 +16,7 @@ export default function SampleDetailsModal({ open, onClose, sample = {} }) {
     ['ID Paciente', 'ID_PACIENTE'],
     ['Paciente', 'NOME_PACIENTE'],
     ['CPF', 'CPF_PACIENTE'],
+    ['DATA NASCIMENTO', 'DATA_NASC_PACIENTE'], 
   ];
 
   const sampleFields = [
