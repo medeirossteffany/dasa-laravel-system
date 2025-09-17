@@ -1,3 +1,4 @@
+import CameraCapture from './CameraCapture';
 import { router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import SampleDetailsModal from './SampleDetailsModal';
@@ -24,6 +25,8 @@ export default function PatientsSamplesTable({ rows = [], onNewSample }) {
   const pageSize = 10;
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedSample, setSelectedSample] = useState(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   const headers = [
     { key: 'NOME_PACIENTE', label: 'Paciente' },
@@ -114,13 +117,18 @@ export default function PatientsSamplesTable({ rows = [], onNewSample }) {
     setModalOpen(true);
   }
 
+  const showToast = (message) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(""), 5000); 
+  };
+
   return (
     <div className="p-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-2"> 
         <button
           type="button"
-          onClick={() => router.post(route('microscopio.run'))}
+          onClick={() => setCameraOpen(true)}
           className="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
         >
           + Nova amostra
@@ -229,6 +237,23 @@ export default function PatientsSamplesTable({ rows = [], onNewSample }) {
         onClose={() => { setModalOpen(false); setSelectedSample(null); }}
         sample={selectedSample || {}}
       />
+
+      {cameraOpen && (
+          <CameraCapture
+            onClose={async (payload) => {
+              if (payload?.file) {
+                showToast("Imagem enviada com sucesso!");
+              }
+              setCameraOpen(false);
+            }}
+          />
+        )}
+
+      {toastMessage && (
+        <div className="fixed top-5 right-5 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-transform transform">
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }

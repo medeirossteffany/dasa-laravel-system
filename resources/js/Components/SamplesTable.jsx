@@ -1,9 +1,9 @@
-// resources/js/Components/SamplesTable.jsx
 import { useMemo, useState } from 'react';
 import { router } from '@inertiajs/react';
 import SampleDetailsModal from './SampleDetailsModal';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import CameraCapture from './CameraCapture';
 
 function classNames(...c) { return c.filter(Boolean).join(' ') }
 
@@ -25,6 +25,8 @@ export default function SamplesTable({ rows = [] }) {
   const pageSize = 10;
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedSample, setSelectedSample] = useState(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   const headers = [
     { key: 'NOME_PACIENTE', label: 'Paciente' },
@@ -114,18 +116,22 @@ export default function SamplesTable({ rows = [] }) {
     setModalOpen(true);
   }
 
+  const showToast = (message) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(""), 5000); 
+  };
+
   return (
     <div className="p-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* 🔹 Agora tem o botão de Nova amostra */}
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => router.post(route('microscopio.run'))}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
-          >
-            + Nova amostra
-          </button>
+        <button
+        type="button"
+        onClick={() => setCameraOpen(true)}
+        className="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
+      >
+        + Nova amostra
+      </button>
 
           <button
           type="button"
@@ -205,7 +211,6 @@ export default function SamplesTable({ rows = [] }) {
         </table>
       </div>
 
-      {/* paginação */}
       <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
         <span>Total: {total}</span>
         <div className="flex items-center gap-2">
@@ -232,6 +237,24 @@ export default function SamplesTable({ rows = [] }) {
         onClose={() => { setModalOpen(false); setSelectedSample(null); }}
         sample={selectedSample || {}}
       />
+
+      {cameraOpen && (
+        <CameraCapture
+          onClose={async (payload) => {
+            if (payload?.file) {
+              showToast("Imagem enviada com sucesso!");
+            }
+            setCameraOpen(false);
+          }}
+        />
+      )}
+
+    {toastMessage && (
+      <div className="fixed top-5 right-5 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-transform transform">
+        {toastMessage}
+      </div>
+    )}
+
     </div>
   );
 }
