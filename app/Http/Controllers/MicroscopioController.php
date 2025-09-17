@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class MicroscopioController extends Controller
 {
@@ -14,7 +11,7 @@ class MicroscopioController extends Controller
     {
         try {
             $request->validate([
-                'imagem' => 'required|image|max:10240', 
+                'imagem' => 'required|image|max:10240',
                 'anotacao' => 'nullable|string|max:2000',
                 'gemini_obs' => 'nullable|string|max:2000',
                 'amostra_retirada' => 'nullable|in:0,1',
@@ -25,19 +22,29 @@ class MicroscopioController extends Controller
         }
 
         try {
+            // Salvando a imagem
             $image = $request->file('imagem');
             $filename = 'amostra_' . time() . '.png';
             $destDir = storage_path('app/amostras');
             if (!is_dir($destDir)) @mkdir($destDir, 0775, true);
             $path = $image->move($destDir, $filename)->getPathname();
 
-            $venvPython = base_path('.venv/bin/python');
-            if (!file_exists($venvPython)) {
-                $venvPython = 'python3';
+            // Detectando o sistema operacional e definindo Python
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                $venvPython = base_path('.venv\\Scripts\\python.exe');
+                if (!file_exists($venvPython)) {
+                    $venvPython = 'python'; // fallback para Python global no Windows
+                }
+            } else {
+                $venvPython = base_path('.venv/bin/python');
+                if (!file_exists($venvPython)) {
+                    $venvPython = 'python3'; // fallback para macOS/Linux
+                }
             }
 
             $script = base_path('app/Http/Scripts/microscopio.py');
 
+            // Montando o comando
             $cmd = sprintf(
                 '%s %s --image %s --anotacao %s --gemini_obs %s --amostra_retirada %s --cpf %s --user-id %s --user-name %s',
                 escapeshellarg($venvPython),
@@ -65,13 +72,13 @@ class MicroscopioController extends Controller
             $return_value = proc_close($process);
 
             if ($return_value !== 0) {
-                \Log::error('Microscopio script error', ['cmd' => $cmd, 'stdout' => $stdout, 'stderr' => $stderr]);
+                Log::error('Microscopio script error', ['cmd' => $cmd, 'stdout' => $stdout, 'stderr' => $stderr]);
                 return response()->json(['success' => false, 'message' => 'Python retornou erro', 'stdout' => $stdout, 'stderr' => $stderr], 500);
             }
 
             return response()->json(['success' => true, 'file' => $filename, 'stdout' => $stdout, 'stderr' => $stderr]);
         } catch (\Throwable $e) {
-            \Log::error('Upload erro interno: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Upload erro interno: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json(['success' => false, 'message' => 'Erro interno no servidor', 'exception' => $e->getMessage()], 500);
         }
     }
