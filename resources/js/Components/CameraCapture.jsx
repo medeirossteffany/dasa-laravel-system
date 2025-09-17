@@ -6,7 +6,7 @@ export default function CameraCapture({ onClose }) {
   const [stream, setStream] = useState(null);
   const [capturedBlob, setCapturedBlob] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-
+  const [toastMessage, setToastMessage] = useState("");
   const [anotacao, setAnotacao] = useState('');
   const [geminiObs, setGeminiObs] = useState('');
   const [amostraRetirada, setAmostraRetirada] = useState(false);
@@ -85,8 +85,8 @@ export default function CameraCapture({ onClose }) {
   };
 
   const send = async () => {
-    if (!capturedBlob) { alert('Capture uma imagem primeiro'); return; }
-    if (amostraRetirada && !cpf) { alert('Informe CPF'); return; }
+    if (!capturedBlob) { showToast("Capture uma imagem primeiro!"); return; }
+    if (amostraRetirada && !cpf) { showToast("Informe CPF!"); return; }
   
     setLoading(true);
     try {
@@ -125,8 +125,12 @@ export default function CameraCapture({ onClose }) {
       setLoading(false);
     }
   };
-  
 
+  const showToast = (message) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(""), 5000); 
+  };
+  
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden">
@@ -180,6 +184,14 @@ export default function CameraCapture({ onClose }) {
         </div>
         <canvas ref={canvasRef} style={{ display: 'none' }} />
       </div>
+    {/* Toast */}
+    {toastMessage && (
+    <div
+        className="fixed top-5 right-5 px-4 py-2 rounded shadow-lg text-white bg-red-500 transition-transform transform"
+    >
+        {toastMessage}
+    </div>
+    )}
     </div>
   );
 }
