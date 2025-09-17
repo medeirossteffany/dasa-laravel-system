@@ -98,7 +98,7 @@ export default function CameraCapture({ onClose }) {
       formData.append('cpf', cpf || '');
       const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   
-      const res = await fetch('/amostra/upload', {
+      const res = await fetch('/microscopio/upload', {
         method: 'POST',
         body: formData,
         headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
