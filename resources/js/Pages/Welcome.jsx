@@ -102,7 +102,7 @@ function HeroSection() {
             </h1>
 
             <p className="mt-10 text-lg text-center text-neutral-500 max-w-4xl">
-                Para profissionais da saúde, esta é uma solução desenvolvida para a DASA no Challenge FIAP 2025, automatizando a análise de tecidos patológicos com visão computacional.
+                Para profissionais da saúde, esta é uma solução desenvolvida para a DASA no Challenge FIAP 2025, automatizando a análise e gestão de pacientes e amostras patológicos com visão computacional e IA.
             </p>
 
             <div className="flex justify-center my-10">
@@ -128,7 +128,7 @@ function HeroSection() {
 function FeatureSection() {
     const features = [
         {
-            icon: <i className="bi bi-cpu-fill text-xl"></i>,
+            icon: <i className="bi bi-gear-fill text-xl"></i>,
             text: "Automação de Análises",
             description: "Automatizamos a análise de dimensões de amostras patológicas com algoritmos de visão computacional, agilizando diagnósticos de forma precisa.",
         },
@@ -138,9 +138,9 @@ function FeatureSection() {
             description: "Integramos microscópios digitais para capturar imagens com alta precisão, proporcionando maior detalhamento das amostras.",
         },
         {
-            icon: <i className="bi bi-mic-fill text-xl"></i>,
-            text: "Controle por Voz",
-            description: "Sistema otimizado para comandos por voz, garantindo maior acessibilidade e facilidade no uso por diversos profissionais da saúde.",
+            icon: <i className="bi bi-usb-drive-fill text-xl"></i>, 
+            text: "Microscópio físico USB",
+            description: "Microscópio físico com acesso via USB, permitindo visualizar imagens em qualquer dispositivo. Desenvolvemos também um suporte próprio utilizando impressão 3D.",
         },
         {
             icon: <i className="bi bi-browser-chrome text-xl"></i>,
@@ -148,15 +148,16 @@ function FeatureSection() {
             description: "Plataforma web desenvolvida em React e Larevel, proporcionando uma experiência de uso amigável e intuitiva para gestão de pacientes e análises.",
         },
         {
-            icon: <i className="bi bi-database-fill-check text-xl"></i>,
-            text: "Integração com Banco de Dados",
-            description: "Banco de dados para registro automatizado de históricos de pacientes, amostras e receitas, integrado a um sistema Python de visão computacional e IA.",
-        },
+            icon: <i className="bi bi-robot text-xl"></i>, 
+            text: "Integração com IA Gemini",
+            description: "Integração com a inteligência artificial do Gemini para analisar observações e dimensões de amostras, auxiliando profissionais da saúde na tomada de decisões.",
+        },   
         {
-            icon: <i className="bi bi-clipboard-data-fill text-xl"></i>,
-            text: "Redução de Custos",
-            description: "A digitalização e automação dos processos contribuem para a eficiência e significativa redução de custos operacionais nas instituições de saúde.",
+            icon: <i className="bi bi-bar-chart-fill text-xl"></i>, 
+            text: "Eficiência e Redução de Custos",
+            description: "A automação e integração dos sistemas proporcionam maior precisão nas análises, reduzem custos operacionais e facilitam o trabalho dos profissionais da saúde.",
         },
+                 
     ];
 
     return (
@@ -205,32 +206,27 @@ function WorkFlow() {
             description: "Construção de um backend robusto com PHP e Laravel, promovendo segurança, alta performance e arquitetura orientada a objetos, com persistência de dados em MySQL.",
         },        
         {
-            title: "Processamento de Imagem e Áudio com Python",
-            description: "Implementação de visão computacional com a biblioteca OpenCV para análise de imagens, e transcrição de áudio em texto utilizando a biblioteca SpeechRecognition.",
-        },
+            title: "Visão Computacional com Python",
+            description: "Implementação de análise de imagens utilizando a biblioteca OpenCV em Python, com integração à inteligência artificial Gemini para auxiliar na interpretação e processamento das amostras.",
+        },          
     ];
 
     return (
-        <div id="tecnologia" className="mt-20">
+        <div id="tecnologia" className="relative mt-20 border-b border-neutral-800 min-h-[500px]">
             <h2 className="text-3xl sm:text-5xl lg:text-6xl text-center mt-6 tracking-wide">
                 Tecnologias{" "}
                 <span className="bg-gradient-to-r from-blue-500 to-blue-800 text-transparent bg-clip-text">
                     utilizadas.
                 </span>
             </h2>
-            <div className="flex flex-wrap justify-center mt-5">
+            <div className="flex flex-wrap justify-center mt-5 mb-10 gap-x-12">
             <div className="relative w-full lg:max-w-md mt-10">
                 <div className="aspect-[3/3]">
-                    <video
-                    className="rounded-lg w-full h-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    >
-                    <source src="/videos/coding.mp4" type="video/mp4" />
-                    Seu navegador não suporta a tag de vídeo.
-                    </video>
+                <img 
+                    src="/images/code.png" 
+                    alt="Código" 
+                    className="rounded-lg w-full h-full object-cover scale-110"  
+                />
                 </div>
             </div>
 
@@ -265,7 +261,7 @@ function Developers() {
         },
         {
             name: "Steffany Medeiros",
-            description: "Programadora Fullstack com experiência nas tecnologias: Javascript, Node.js, React, Python, SQL e Laravel.",
+            description: "Programadora Fullstack com experiência nas tecnologias: Javascript, Node.js, React, Python, SQL e PHP.",
             image: "/images/steffany.jpeg",
             github: "https://github.com/medeirossteffany",
             linkedin: "https://www.linkedin.com/in/steffany-medeiros-8a50192a4?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app",
@@ -280,7 +276,7 @@ function Developers() {
     ];
 
     return (
-    <div id="desenvolvedores" className="mt-8 px-6 sm:px-12 lg:px-20 py-12 tracking-wide">
+    <div id="desenvolvedores" className="mt-10 px-6 sm:px-12 lg:px-20 py-12 tracking-wide">
         <h2 className="text-3xl sm:text-5xl lg:text-6xl text-center mb-10 lg:mb-16">
             Desenvolvedores
         </h2>

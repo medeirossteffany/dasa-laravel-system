@@ -22,7 +22,6 @@ class MicroscopioController extends Controller
         }
 
         try {
-            // Salvando a imagem
             $image = $request->file('imagem');
             $filename = 'amostra_' . time() . '.png';
             $destDir = storage_path('app/amostras');
