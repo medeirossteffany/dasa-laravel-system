@@ -4,30 +4,42 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $items = DB::table('PACIENTE as p')
-            ->leftJoin('AMOSTRA as a', 'a.PACIENTE_ID_PACIENTE', '=', 'p.ID_PACIENTE')
-            ->selectRaw("
-                p.ID_PACIENTE,
-                p.NOME_PACIENTE,
-                p.CPF_PACIENTE,
-                a.ID_AMOSTRA,
-                a.DATA_AMOSTRA,
-                a.ALTURA_AMOSTRA,
-                a.LARGURA_AMOSTRA,
-                a.ESPESSURA,
-                a.ANOTACAO_MEDICO_AMOSTRA,
-                a.ANOTACAO_IA_AMOSTRA
-            ")
-            ->orderByDesc('a.DATA_AMOSTRA')
-            ->get();
+        $items = DB::table('PACIENTE')->orderBy('NOME_PACIENTE')->get();
 
         return Inertia::render('Dashboard', [
             'items' => $items,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'nome' => 'required|string|max:255',
+            'cpf' => ['required','string','size:11', Rule::unique('PACIENTE','CPF_PACIENTE')],
+            'data_nascimento' => 'required|date|before_or_equal:today',
+            'endereco' => 'nullable|string|max:255',
+            'sexo' => 'required|in:M,F,O',
+        ]);
+
+        $id = DB::table('PACIENTE')->insertGetId([
+            'NOME_PACIENTE' => $data['nome'],
+            'CPF_PACIENTE' => $data['cpf'],
+            'DATA_NASC_PACIENTE' => $data['data_nascimento'],
+            'ENDERECO' => $data['endereco'],
+            'SEXO' => $data['sexo'],
+        ]);
+
+        $newPatient = DB::table('PACIENTE')->where('ID_PACIENTE', $id)->first();
+
+        return Inertia::render('Dashboard', [
+            'newPatient' => $newPatient,
         ]);
     }
 }

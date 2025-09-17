@@ -27,11 +27,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/dashboard', [DashboardController::class, 'store']);
+
 
     Route::get('/amostras', [AmostraController::class, 'index'])->name('amostras.index');
     Route::get('/amostras/{id}', [AmostraController::class, 'show'])->name('amostras.show');
     Route::get('/amostras/{id}/imagem', [AmostraController::class, 'imagem'])->name('amostras.imagem');
-    
+
     Route::post('/microscopio/upload', [MicroscopioController::class, 'upload']);
 });
 
