@@ -13,25 +13,27 @@ class AmostraController extends Controller
     {
         $items = DB::table('AMOSTRA as a')
             ->leftJoin('PACIENTE as p', 'p.ID_PACIENTE', '=', 'a.PACIENTE_ID_PACIENTE')
+            ->leftJoin('USUARIO as u', 'u.ID_USUARIO', '=', 'a.MEDICO_USUARIO_ID_USUARIO')
             ->selectRaw("
-            a.ID_AMOSTRA,
-            a.DATA_AMOSTRA,
-            a.ALTURA_AMOSTRA,
-            a.LARGURA_AMOSTRA,
-            a.ESPESSURA,
-            a.ANOTACAO_MEDICO_AMOSTRA,
-            a.ANOTACAO_IA_AMOSTRA,
-            p.ID_PACIENTE,
-            p.NOME_PACIENTE,
-            p.CPF_PACIENTE
+                a.ID_AMOSTRA,
+                a.DATA_AMOSTRA,
+                a.ALTURA_AMOSTRA,
+                a.LARGURA_AMOSTRA,
+                a.ESPESSURA,
+                a.ANOTACAO_MEDICO_AMOSTRA,
+                a.ANOTACAO_IA_AMOSTRA,
+                p.ID_PACIENTE,
+                p.NOME_PACIENTE,
+                p.CPF_PACIENTE,
+                u.NOME_USUARIO AS NOME_MEDICO
             ")
             ->orderByDesc('a.DATA_AMOSTRA')
             ->get();
-
-            return Inertia::render('Amostras/Index', [
+    
+        return Inertia::render('Amostras/Index', [
             'items' => $items,
-            ]);
-        }
+        ]);
+    }
 
         public function show($id)
     {

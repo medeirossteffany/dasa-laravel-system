@@ -35,11 +35,12 @@ export default function SamplesTable({ rows = [] }) {
     { key: 'ALTURA_AMOSTRA', label: 'Altura' },
     { key: 'LARGURA_AMOSTRA', label: 'Largura' },
     { key: 'ESPESSURA', label: 'Espessura' },
-    { key: 'ANOTACAO_MEDICO_AMOSTRA', label: 'Anotação Médico' },
+    { key: 'NOME_MEDICO', label: 'Profissional' }, 
+    { key: 'ANOTACAO_MEDICO_AMOSTRA', label: 'Anotação Profissional' },
     { key: 'ANOTACAO_IA_AMOSTRA', label: 'Anotação IA' },
     { key: 'DETALHES', label: 'Detalhes' },
   ];
-
+  
   function toggleSort(key) {
     setPage(1);
     setSort((s) => s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' });
@@ -85,7 +86,7 @@ export default function SamplesTable({ rows = [] }) {
   function exportPDF() {
     const doc = new jsPDF();
   
-    const cols = ['Paciente','CPF','Data','Altura','Largura','Espessura','Anotação Médico','Anotação IA'];
+    const cols = ['Paciente','CPF','Data','Altura','Largura','Espessura', 'Profissional', 'Anotação Profissional','Anotação IA'];
   
     const rows = sorted.map(r => [
       r.NOME_PACIENTE ?? '',
@@ -94,6 +95,7 @@ export default function SamplesTable({ rows = [] }) {
       r.ALTURA_AMOSTRA ?? '',
       r.LARGURA_AMOSTRA ?? '',
       r.ESPESSURA ?? '',
+      r.NOME_MEDICO ?? '', 
       (r.ANOTACAO_MEDICO_AMOSTRA ?? '').replace(/[\r\n]+/g,' '),
       (r.ANOTACAO_IA_AMOSTRA ?? '').replace(/[\r\n]+/g,' '),
     ]);
@@ -172,14 +174,6 @@ export default function SamplesTable({ rows = [] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
-            {visible.length === 0 && (
-              <tr>
-                <td colSpan={headers.length} className="px-4 py-6 text-center text-sm text-gray-500">
-                  Nenhum registro encontrado.
-                </td>
-              </tr>
-            )}
-
             {visible.map((r) => (
               <tr key={`${r.ID_AMOSTRA ?? 'a'}-${r.ID_PACIENTE ?? 'np'}`}>
                 <td className="px-4 py-3">{r.NOME_PACIENTE || <span className="text-gray-400">sem paciente</span>}</td>
@@ -188,16 +182,17 @@ export default function SamplesTable({ rows = [] }) {
                 <td className="px-4 py-3">{r.ALTURA_AMOSTRA}</td>
                 <td className="px-4 py-3">{r.LARGURA_AMOSTRA}</td>
                 <td className="px-4 py-3">{r.ESPESSURA}</td>
+                <td className="px-4 py-3">{r.NOME_MEDICO || '—'}</td> {/* PROFISSIONAL */}
                 <td className="px-4 py-3 max-w-[28rem] truncate" title={r.ANOTACAO_MEDICO_AMOSTRA || ''}>
-                  {r.ANOTACAO_MEDICO_AMOSTRA}
+                  {r.ANOTACAO_MEDICO_AMOSTRA || '—'}
                 </td>
                 <td className="px-4 py-3 max-w-[28rem] truncate" title={r.ANOTACAO_IA_AMOSTRA || ''}>
-                  {r.ANOTACAO_IA_AMOSTRA}
+                  {r.ANOTACAO_IA_AMOSTRA || '—'}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
                     <button
-                      onClick={() => openDetails(r)} 
+                      onClick={() => openDetails(r)}
                       className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50"
                       title="Ver detalhes"
                     >

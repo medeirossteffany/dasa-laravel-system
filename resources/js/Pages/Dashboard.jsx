@@ -3,9 +3,8 @@ import PatientsSamplesTable from '@/Components/PatientsSamplesTable';
 import { Head, router } from '@inertiajs/react';
 
 export default function Dashboard({ items = [] }) {
-  // items vem do backend (join PACIENTE+AMOSTRA)
+
   function handleNewSample() {
-    // navega para a rota de criação (ajuste o nome da sua rota)
     router.visit(route('amostras.create'));
   }
 

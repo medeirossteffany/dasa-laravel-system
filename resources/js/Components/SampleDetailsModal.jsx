@@ -1,13 +1,5 @@
 import React from 'react';
 
-/**
- * SampleDetailsModal organizado em:
- *  - Seção: Informações do Paciente (somente campos do paciente)
- *  - Seção: Informações da Amostra (campos da amostra, anotação IA em largura total, imagem em largura total)
- *
- * Usa getImageRoute fallback para /amostras/{id}/imagem (substitua por Ziggy route() se usar).
- */
-
 function getImageRoute(id) {
   if (typeof route === 'function') {
     try {
@@ -32,7 +24,8 @@ export default function SampleDetailsModal({ open, onClose, sample = {} }) {
     ['Altura', 'ALTURA_AMOSTRA'],
     ['Largura', 'LARGURA_AMOSTRA'],
     ['Espessura', 'ESPESSURA'],
-    ['Anotação Médico', 'ANOTACAO_MEDICO_AMOSTRA'],
+    ['Profissional', 'NOME_MEDICO'], 
+    ['Anotação Profissional', 'ANOTACAO_MEDICO_AMOSTRA'],
   ];
 
   const imageSrc = sample.IMAGEM_URL
@@ -88,7 +81,7 @@ export default function SampleDetailsModal({ open, onClose, sample = {} }) {
                 <div key={key} className="space-y-1">
                   <div className="text-xs font-medium text-gray-500">{label}</div>
                   <div className="text-sm text-gray-800 border rounded p-2 bg-gray-50 whitespace-pre-wrap break-words">
-                    {sample[key] ?? '—'}
+                    {sample[key] !== '' && sample[key] != null ? sample[key] : '—'}
                   </div>
                 </div>
               ))}
@@ -97,7 +90,7 @@ export default function SampleDetailsModal({ open, onClose, sample = {} }) {
               <div className="sm:col-span-2 space-y-1">
                 <div className="text-xs font-medium text-gray-500">Anotação IA</div>
                 <div className="text-sm text-gray-800 border rounded p-3 bg-gray-50 whitespace-pre-wrap break-words min-h-[4rem]">
-                  {sample.ANOTACAO_IA_AMOSTRA ?? '—'}
+                {sample.ANOTACAO_IA_AMOSTRA !== '' && sample.ANOTACAO_IA_AMOSTRA != null ? sample.ANOTACAO_IA_AMOSTRA : '—'}
                 </div>
               </div>
 
