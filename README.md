@@ -76,8 +76,8 @@ pip install opencv-python numpy pymysql python-dotenv google-generativeai
 
 ## Desenvolvedores
 
-*   **Gustavo Henrique:** [GitHub](https://github.com/guta231) | [LinkedIn]([https://www.linkedin.com/in/gustavohenrique](https://www.linkedin.com/in/gustavo-henrique-a4aa762b1?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app))
-*   **Steffany Medeiros:** [GitHub](https://github.com/medeirossteffany) | [LinkedIn]([https://www.linkedin.com/in/steffanymedeiros](https://www.linkedin.com/in/steffany-medeiros-8a50192a4?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app))
+*   **Gustavo Henrique:** [GitHub](https://github.com/guta231) | [LinkedIn](https://www.linkedin.com/in/gustavo-henrique-a4aa762b1?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app)
+*   **Steffany Medeiros:** [GitHub](https://github.com/medeirossteffany) | [LinkedIn](https://www.linkedin.com/in/steffany-medeiros-8a50192a4?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app)
 *   **Milena Garcia:** [GitHub](https://github.com/MilenaGarciaCosta) | [LinkedIn](https://www.linkedin.com/in/milena-garcia-605931256?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app)
 
 
