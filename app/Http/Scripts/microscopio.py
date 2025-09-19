@@ -64,7 +64,7 @@ def inserir_print(conexao, frame, id_usuario, mm_per_pixel_x, mm_per_pixel_y,
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"captura_{timestamp}.png"
         cv2.imwrite(filename, frame)
-        print(f"[✔] Imagem salva: {filename}")
+        print(f"[OK] Imagem salva: {filename}")
 
         # Converte para cinza e detecta contornos
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
