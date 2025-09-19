@@ -20,7 +20,8 @@ export default function NewPatientModal({ open, onClose, onCreated }) {
       setErrors({ cpf: 'CPF deve ter 11 números sem pontos' });
       return;
     }
-    if (new Date(dataNascimento) > new Date()) {
+    const hoje = new Date().toISOString().split("T")[0]; 
+    if (dataNascimento > hoje) {
       setErrors({ data_nascimento: 'Data de nascimento não pode ser futura' });
       return;
     }

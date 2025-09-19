@@ -8,10 +8,13 @@ function classNames(...c) { return c.filter(Boolean).join(' ') }
 
 function formatDate(d) {
   if (!d) return '';
-  const date = typeof d === 'string' ? new Date(d) : d;
-  if (Number.isNaN(date.getTime())) return d;
-  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(date);
+  if (typeof d === 'string') {
+    const [year, month, day] = d.split('-');
+    return `${day}/${month}/${year}`; 
+  }
+  return '';
 }
+
 
 export default function PatientsTable({ rows = [], onPatientCreated }) {
   const [query, setQuery] = useState('');

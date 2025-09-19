@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -31,7 +32,7 @@ class DashboardController extends Controller
         $id = DB::table('PACIENTE')->insertGetId([
             'NOME_PACIENTE' => $data['nome'],
             'CPF_PACIENTE' => $data['cpf'],
-            'DATA_NASC_PACIENTE' => $data['data_nascimento'],
+            'DATA_NASC_PACIENTE' => Carbon::parse($data['data_nascimento'])->format('Y-m-d'),
             'ENDERECO' => $data['endereco'],
             'SEXO' => $data['sexo'],
         ]);
