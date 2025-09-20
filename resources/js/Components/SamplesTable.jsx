@@ -143,15 +143,9 @@ export default function SamplesTable({ rows = [] }) {
         </button>
         </div>
 
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Pesquisar"
-            value={query}
-            onChange={(e) => { setPage(1); setQuery(e.target.value); }}
-            className="w-50 rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <input type="text" placeholder="Pesquisar" value={query} onChange={e => { setPage(1); setQuery(e.target.value); }}
+          className="w-50 rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
       <div className="overflow-x-auto rounded-xl border">
