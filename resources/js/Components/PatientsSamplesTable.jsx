@@ -8,10 +8,13 @@ function classNames(...c) { return c.filter(Boolean).join(' ') }
 
 function formatDate(d) {
   if (!d) return '';
-  const date = typeof d === 'string' ? new Date(d) : d;
-  if (Number.isNaN(date.getTime())) return d;
-  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(date);
+  if (typeof d === 'string') {
+    const [year, month, day] = d.split('-');
+    return `${day}/${month}/${year}`; 
+  }
+  return '';
 }
+
 
 export default function PatientsTable({ rows = [], onPatientCreated }) {
   const [query, setQuery] = useState('');
@@ -20,6 +23,7 @@ export default function PatientsTable({ rows = [], onPatientCreated }) {
   const pageSize = 10;
   const [newPatientOpen, setNewPatientOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [patients, setPatients] = useState(rows);
 
   const headers = [
     { key: 'NOME_PACIENTE', label: 'Nome' },
@@ -35,13 +39,13 @@ export default function PatientsTable({ rows = [], onPatientCreated }) {
   }
 
   const filtered = useMemo(() => {
-    if (!query) return rows;
+    if (!query) return patients;
     const q = query.toLowerCase();
-    return rows.filter(r =>
+    return patients.filter(r =>
       (r.NOME_PACIENTE || '').toLowerCase().includes(q) ||
       (r.CPF_PACIENTE || '').includes(q)
     );
-  }, [rows, query]);
+  }, [patients, query]);  
 
   const sorted = useMemo(() => {
     const { key, dir } = sort;
@@ -146,7 +150,11 @@ export default function PatientsTable({ rows = [], onPatientCreated }) {
       <NewPatientModal
         open={newPatientOpen}
         onClose={() => setNewPatientOpen(false)}
-        onCreated={(p) => { showToast('Paciente criado com sucesso!'); if (onPatientCreated) onPatientCreated(p); }}
+        onCreated={(p) => {
+          showToast('Paciente criado com sucesso!');
+          setPatients(prev => [...prev, p]); 
+          if (onPatientCreated) onPatientCreated(p);
+        }}
       />
 
       {toastMessage && (

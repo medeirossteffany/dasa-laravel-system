@@ -220,16 +220,13 @@ function WorkFlow() {
                 </span>
             </h2>
             <div className="flex flex-wrap justify-center mt-5 mb-10 gap-x-12">
-            <div className="relative w-full lg:max-w-md mt-10">
-                <div className="aspect-[3/3]">
+            <div className="relative w-full lg:max-w-lg mt-5">
                 <img 
-                    src="/images/code.png" 
-                    alt="Código" 
-                    className="rounded-lg w-full h-full object-cover scale-110"  
+                src="/images/code.png" 
+                alt="Código" 
+                className="rounded-lg w-full h-auto object-contain"  
                 />
-                </div>
             </div>
-
 
             <div className="pt-12 w-full lg:w-1/2">
                 {checklistItems.map((item, index) => (
