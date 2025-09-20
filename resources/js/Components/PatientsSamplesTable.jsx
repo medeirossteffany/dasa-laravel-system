@@ -149,7 +149,11 @@ export default function PatientsTable({ rows = [], onPatientCreated }) {
       <NewPatientModal
         open={newPatientOpen}
         onClose={() => setNewPatientOpen(false)}
-        onCreated={(p) => { showToast('Paciente criado com sucesso!'); if (onPatientCreated) onPatientCreated(p); }}
+        onCreated={(p) => {
+          showToast('Paciente criado com sucesso!');
+          if (onPatientCreated) onPatientCreated(p);
+          window.location.reload();
+        }}
       />
 
       {toastMessage && (

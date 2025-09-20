@@ -215,6 +215,7 @@ export default function SamplesTable({ rows = [] }) {
           onClose={async (payload) => {
             if (payload?.file) {
               showToast("Imagem enviada com sucesso!");
+              window.location.reload();
             }
             setCameraOpen(false);
           }}
