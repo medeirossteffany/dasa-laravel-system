@@ -397,7 +397,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
             <Head title="DASA - Análises Patológicas com IA" />
             <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
             
-            <div className="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
+            <div className="bg-black text-white">
                 <div className="relative flex min-h-screen flex-col">
                     <NavBar auth={auth} />
                     <div className="max-w-7xl mx-auto pt-20 px-6">
