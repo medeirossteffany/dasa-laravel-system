@@ -25,7 +25,6 @@ DB_NAME = os.getenv("DB_DATABASE")
 
 # -------------------- Funções --------------------
 def conectar_banco():
-    """Cria conexão com MySQL"""
     try:
         conexao = pymysql.connect(
             host=DB_HOST,
@@ -41,9 +40,7 @@ def conectar_banco():
         print(f"Erro ao conectar ao banco: {err}", file=sys.stderr)
         raise
 
-
 def buscar_paciente_por_cpf(conexao, cpf_str):
-    """Consulta ID do paciente pelo CPF"""
     cpf_digits = ''.join(filter(str.isdigit, cpf_str or ''))
     if not cpf_digits:
         return None
@@ -52,28 +49,19 @@ def buscar_paciente_por_cpf(conexao, cpf_str):
         row = cursor.fetchone()
         return row['ID_PACIENTE'] if row else None
 
-
 def inserir_print(conexao, frame, id_usuario, mm_per_pixel_x, mm_per_pixel_y,
                   anotacao_medico, gemini_result, paciente_id=None):
-    """
-    Salva imagem temporária, calcula contornos, medidas, 
-    e grava imagem + dados no banco
-    """
     try:
-        # Salva temporariamente
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"captura_{timestamp}.png"
         cv2.imwrite(filename, frame)
-        print(f"[OK] Imagem salva: {filename}")
 
-        # Converte para cinza e detecta contornos
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         _, threshold = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
         kernel = np.ones((5, 5), np.uint8)
         eroded = cv2.erode(threshold, kernel, iterations=1)
         contours, _ = cv2.findContours(eroded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Calcula largura e altura em mm
         larguras, alturas = [], []
         for c in contours:
             x, y, w, h = cv2.boundingRect(c)
@@ -87,14 +75,11 @@ def inserir_print(conexao, frame, id_usuario, mm_per_pixel_x, mm_per_pixel_y,
         alturas.sort(reverse=True)
         segunda_largura = round(larguras[1] if len(larguras) > 1 else (larguras[0] if larguras else 0), 2)
         segunda_altura = round(alturas[1] if len(alturas) > 1 else (alturas[0] if alturas else 0), 2)
-        print(f"Largura: {segunda_largura} mm | Altura: {segunda_altura} mm")
 
-        # Lê binário da imagem
         with open(filename, 'rb') as f:
             imagem_binaria = f.read()
         data_atual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # Monta SQL
         colunas = ["IMAGEM_AMOSTRA", "ALTURA_AMOSTRA", "LARGURA_AMOSTRA",
                    "DATA_AMOSTRA", "MEDICO_USUARIO_ID_USUARIO",
                    "ANOTACAO_MEDICO_AMOSTRA", "ANOTACAO_IA_AMOSTRA"]
@@ -121,20 +106,13 @@ def inserir_print(conexao, frame, id_usuario, mm_per_pixel_x, mm_per_pixel_y,
         traceback.print_exc(file=sys.stderr)
         raise
 
-
 def analisar_com_gemini(largura_mm, altura_mm, margem_ok, observacoes, amostra_retirada):
-    """Chama API Gemini e retorna análise textual"""
     if not api_key:
         print("GEMINI_API_KEY não configurada. Pulando Gemini", file=sys.stderr)
         return ""
     try:
-        if amostra_retirada:
-            local = "Análise em amostra retirada do paciente"
-            margem_texto = f"- Margem: {'OK' if margem_ok else 'Insuficiente'}\n"
-        else:
-            local = "Análise direta no corpo do paciente"
-            margem_texto = ""
-
+        local = "Análise em amostra retirada do paciente" if amostra_retirada else "Análise direta no corpo do paciente"
+        margem_texto = f"- Margem: {'OK' if margem_ok else 'Insuficiente'}\n" if amostra_retirada else ""
         prompt = (
             f"{local}\n"
             f"Largura: {largura_mm:.2f} mm\n"
@@ -151,11 +129,7 @@ def analisar_com_gemini(largura_mm, altura_mm, margem_ok, observacoes, amostra_r
         traceback.print_exc(file=sys.stderr)
         return ""
 
-
 def process_image_file(image_path, anotacao, gemini_obs, amostra_retirada_flag, cpf, user_id, user_name):
-    """
-    Função principal: lê imagem, calcula contornos, chama Gemini e insere no banco.
-    """
     try:
         if not os.path.isfile(image_path):
             print(f"Arquivo não encontrado: {image_path}", file=sys.stderr)
@@ -166,35 +140,53 @@ def process_image_file(image_path, anotacao, gemini_obs, amostra_retirada_flag, 
             print(f"Não foi possível ler a imagem: {image_path}", file=sys.stderr)
             return 3
 
-        mm_per_pixel_x, mm_per_pixel_y = 0.0723, 0.06696
+        mm_per_pixel_x, mm_per_pixel_y = 0.0265, 0.0291
 
-        # Detecta contornos e calcula segunda maior largura/altura
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        _, thresh = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
-        kernel = np.ones((5, 5), np.uint8)
-        eroded = cv2.erode(thresh, kernel, iterations=1)
-        contours, _ = cv2.findContours(eroded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # ----------------- Lógica do segundo código adaptada -----------------
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        lower_black = np.array([0, 0, 0])
+        upper_black = np.array([180, 255, 60])
+        mask_black = cv2.inRange(hsv, lower_black, upper_black)
 
-        larguras, alturas = [], []
-        for c in contours:
-            x, y, w, h = cv2.boundingRect(c)
-            mmX, mmY = w*mm_per_pixel_x, h*mm_per_pixel_y
-            if mmX < 2 or mmY < 2: continue
-            larguras.append(mmX)
-            alturas.append(mmY)
+        lower_red1 = np.array([0, 70, 50])
+        upper_red1 = np.array([10, 255, 255])
+        lower_red2 = np.array([170, 70, 50])
+        upper_red2 = np.array([180, 255, 255])
+        mask_red = cv2.inRange(hsv, lower_red1, upper_red1) | cv2.inRange(hsv, lower_red2, upper_red2)
 
-        larguras.sort(reverse=True)
-        alturas.sort(reverse=True)
-        segunda_largura = round(larguras[1] if len(larguras)>1 else (larguras[0] if larguras else 0),2)
-        segunda_altura = round(alturas[1] if len(alturas)>1 else (alturas[0] if alturas else 0),2)
-        print(f"[process_image] segunda_largura={segunda_largura}, segunda_altura={segunda_altura}")
+        contours_black, _ = cv2.findContours(mask_black, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if contours_black:
+            c_black = max(contours_black, key=cv2.contourArea)
+            x, y, w, h = cv2.boundingRect(c_black)
 
-        margem_ok = bool(segunda_largura>0 and segunda_altura>0)
+            largura_mm = w * mm_per_pixel_x
+            altura_mm = h * mm_per_pixel_y
+
+            # Margem mínima 0.2 mm
+            margem_ok = True
+            margem_minima_px = int(0.2 / ((mm_per_pixel_x + mm_per_pixel_y) / 2))
+            x_exp = max(0, x - margem_minima_px)
+            y_exp = max(0, y - margem_minima_px)
+            w_exp = min(frame.shape[1] - x_exp, w + 2 * margem_minima_px)
+            h_exp = min(frame.shape[0] - y_exp, h + 2 * margem_minima_px)
+            roi_margem = mask_red[y_exp:y_exp + h_exp, x_exp:x_exp + w_exp]
+            borda_superior = roi_margem[0:margem_minima_px, :]
+            borda_inferior = roi_margem[-margem_minima_px:, :]
+            borda_esquerda = roi_margem[:, 0:margem_minima_px]
+            borda_direita = roi_margem[:, -margem_minima_px:]
+            if (cv2.countNonZero(borda_superior) == 0 or
+                cv2.countNonZero(borda_inferior) == 0 or
+                cv2.countNonZero(borda_esquerda) == 0 or
+                cv2.countNonZero(borda_direita) == 0):
+                margem_ok = False
+        else:
+            largura_mm, altura_mm, margem_ok = 0, 0, False
+        # ----------------------------------------------------------------------
 
         conexao = conectar_banco()
         paciente_id = buscar_paciente_por_cpf(conexao, cpf) if amostra_retirada_flag and cpf else None
 
-        gemini_result = analisar_com_gemini(segunda_largura, segunda_altura, margem_ok, gemini_obs, amostra_retirada_flag)
+        gemini_result = analisar_com_gemini(largura_mm, altura_mm, margem_ok, gemini_obs, amostra_retirada_flag)
 
         inserir_print(conexao, frame, int(user_id) if user_id else None,
                       mm_per_pixel_x, mm_per_pixel_y, anotacao, gemini_result,
@@ -211,9 +203,7 @@ def process_image_file(image_path, anotacao, gemini_obs, amostra_retirada_flag, 
         traceback.print_exc(file=sys.stderr)
         return 10
 
-
 def parse_args_and_run():
-    """Função de CLI: lê argumentos e chama processamento"""
     parser = argparse.ArgumentParser()
     parser.add_argument('--image', required=True, help='Caminho para o arquivo de imagem (png/jpg)')
     parser.add_argument('--anotacao', default='')
@@ -229,7 +219,5 @@ def parse_args_and_run():
                             args.user_id, args.user_name)
     sys.exit(rc)
 
-
-# -------------------- Main --------------------
 if __name__ == '__main__':
     parse_args_and_run()

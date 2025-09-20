@@ -9,6 +9,7 @@ class MicroscopioController extends Controller
 {
     public function upload(Request $request)
     {
+        set_time_limit(0);
         try {
             $request->validate([
                 'imagem' => 'required|image|max:10240',
