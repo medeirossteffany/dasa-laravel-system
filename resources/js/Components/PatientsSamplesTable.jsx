@@ -23,6 +23,7 @@ export default function PatientsTable({ rows = [], onPatientCreated }) {
   const pageSize = 10;
   const [newPatientOpen, setNewPatientOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [patients, setPatients] = useState(rows);
 
   const headers = [
     { key: 'NOME_PACIENTE', label: 'Nome' },
@@ -38,13 +39,13 @@ export default function PatientsTable({ rows = [], onPatientCreated }) {
   }
 
   const filtered = useMemo(() => {
-    if (!query) return rows;
+    if (!query) return patients;
     const q = query.toLowerCase();
-    return rows.filter(r =>
+    return patients.filter(r =>
       (r.NOME_PACIENTE || '').toLowerCase().includes(q) ||
       (r.CPF_PACIENTE || '').includes(q)
     );
-  }, [rows, query]);
+  }, [patients, query]);  
 
   const sorted = useMemo(() => {
     const { key, dir } = sort;
@@ -151,8 +152,8 @@ export default function PatientsTable({ rows = [], onPatientCreated }) {
         onClose={() => setNewPatientOpen(false)}
         onCreated={(p) => {
           showToast('Paciente criado com sucesso!');
+          setPatients(prev => [...prev, p]); 
           if (onPatientCreated) onPatientCreated(p);
-          window.location.reload();
         }}
       />
 
