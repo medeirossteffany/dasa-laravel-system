@@ -220,12 +220,12 @@ function WorkFlow() {
                 </span>
             </h2>
             <div className="flex flex-wrap justify-center mt-5 mb-10 gap-x-12">
-            <div className="relative w-full lg:max-w-md mt-5">
-            <img 
+            <div className="relative w-full lg:max-w-lg mt-5">
+                <img 
                 src="/images/code.png" 
                 alt="Código" 
-                className="rounded-lg w-full object-contain"  
-            />
+                className="rounded-lg w-full h-auto object-contain"  
+                />
             </div>
 
             <div className="pt-12 w-full lg:w-1/2">
