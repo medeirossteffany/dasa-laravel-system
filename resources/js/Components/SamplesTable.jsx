@@ -100,7 +100,6 @@ export default function SamplesTable({ rows = [] }) {
       (r.ANOTACAO_IA_AMOSTRA ?? '').replace(/[\r\n]+/g,' '),
     ]);
   
-    // USANDO autoTable corretamente
     autoTable(doc, {
       head: [cols],
       body: rows,
