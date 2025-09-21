@@ -1,13 +1,13 @@
-import cv2 
-import numpy as np  
-import datetime  
-import pymysql  
-import os  
-import sys  
-import argparse  
-from dotenv import load_dotenv  
-import google.generativeai as genai  
-import traceback  
+import cv2
+import numpy as np
+import datetime
+import pymysql
+import os
+import sys
+import argparse
+from dotenv import load_dotenv
+import google.generativeai as genai
+import traceback
 
 # -------------------- Configuração --------------------
 load_dotenv()
@@ -49,41 +49,66 @@ def buscar_paciente_por_cpf(conexao, cpf_str):
         row = cursor.fetchone()
         return row['ID_PACIENTE'] if row else None
 
-def inserir_print(conexao, frame, id_usuario, mm_per_pixel_x, mm_per_pixel_y,
+def analisar_imagem(frame):
+    # Converte para escala de cinza
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Binarização
+    _, threshold = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
+
+    # Kernel para morfologia
+    kernel = np.ones((5,5), np.uint8)
+
+    # Erosão
+    dilation = cv2.erode(threshold, kernel, iterations=1)
+
+    # Contornos
+    contours, _ = cv2.findContours(dilation, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    if len(contours) < 2:
+        print("Não foram encontrados contornos suficientes.")
+        return 0, 0
+
+    # Ordena contornos por área (maior → menor)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)
+
+    # Pega o segundo maior contorno
+    c = contours[1]
+    x, y, w, h = cv2.boundingRect(c)
+
+    mmx = round(((w*1)/451)*10, 2)   # largura em mm
+    mmy = round((h*10)/371, 2)      # altura em mm
+
+    # Desenha o retângulo
+    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+    # Escreve as medidas na imagem
+    cv2.putText(frame, f"L: {mmx} mm", (x, y-20),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+    cv2.putText(frame, f"A: {mmy} mm", (x, y-50),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+
+    # Salva imagem com resultado
+    cv2.imwrite("resultado.jpg", frame)
+
+    return mmx, mmy
+
+def inserir_print(conexao, frame, id_usuario, largura, altura,
                   anotacao_medico, gemini_result, paciente_id=None):
     try:
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"captura_{timestamp}.png"
         cv2.imwrite(filename, frame)
 
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        _, threshold = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
-        kernel = np.ones((5, 5), np.uint8)
-        eroded = cv2.erode(threshold, kernel, iterations=1)
-        contours, _ = cv2.findContours(eroded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-        larguras, alturas = [], []
-        for c in contours:
-            x, y, w, h = cv2.boundingRect(c)
-            mmX, mmY = w*mm_per_pixel_x, h*mm_per_pixel_y
-            if mmX < 2 or mmY < 2:
-                continue
-            larguras.append(mmX)
-            alturas.append(mmY)
-
-        larguras.sort(reverse=True)
-        alturas.sort(reverse=True)
-        segunda_largura = round(larguras[1] if len(larguras) > 1 else (larguras[0] if larguras else 0), 2)
-        segunda_altura = round(alturas[1] if len(alturas) > 1 else (alturas[0] if alturas else 0), 2)
-
         with open(filename, 'rb') as f:
             imagem_binaria = f.read()
         data_atual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+        # Note que largura e altura já foram calculadas no frame
         colunas = ["IMAGEM_AMOSTRA", "ALTURA_AMOSTRA", "LARGURA_AMOSTRA",
                    "DATA_AMOSTRA", "MEDICO_USUARIO_ID_USUARIO",
                    "ANOTACAO_MEDICO_AMOSTRA", "ANOTACAO_IA_AMOSTRA"]
-        valores = [imagem_binaria, segunda_altura, segunda_largura, data_atual,
+        valores = [imagem_binaria, altura, largura, data_atual,
                    id_usuario, anotacao_medico, gemini_result]
 
         if paciente_id:
@@ -140,47 +165,10 @@ def process_image_file(image_path, anotacao, gemini_obs, amostra_retirada_flag, 
             print(f"Não foi possível ler a imagem: {image_path}", file=sys.stderr)
             return 3
 
-        mm_per_pixel_x, mm_per_pixel_y = 0.0265, 0.0291
 
-        # ----------------- Lógica do segundo código adaptada -----------------
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lower_black = np.array([0, 0, 0])
-        upper_black = np.array([180, 255, 60])
-        mask_black = cv2.inRange(hsv, lower_black, upper_black)
-
-        lower_red1 = np.array([0, 70, 50])
-        upper_red1 = np.array([10, 255, 255])
-        lower_red2 = np.array([170, 70, 50])
-        upper_red2 = np.array([180, 255, 255])
-        mask_red = cv2.inRange(hsv, lower_red1, upper_red1) | cv2.inRange(hsv, lower_red2, upper_red2)
-
-        contours_black, _ = cv2.findContours(mask_black, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        if contours_black:
-            c_black = max(contours_black, key=cv2.contourArea)
-            x, y, w, h = cv2.boundingRect(c_black)
-
-            largura_mm = w * mm_per_pixel_x
-            altura_mm = h * mm_per_pixel_y
-
-            # Margem mínima 0.2 mm
-            margem_ok = True
-            margem_minima_px = int(0.2 / ((mm_per_pixel_x + mm_per_pixel_y) / 2))
-            x_exp = max(0, x - margem_minima_px)
-            y_exp = max(0, y - margem_minima_px)
-            w_exp = min(frame.shape[1] - x_exp, w + 2 * margem_minima_px)
-            h_exp = min(frame.shape[0] - y_exp, h + 2 * margem_minima_px)
-            roi_margem = mask_red[y_exp:y_exp + h_exp, x_exp:x_exp + w_exp]
-            borda_superior = roi_margem[0:margem_minima_px, :]
-            borda_inferior = roi_margem[-margem_minima_px:, :]
-            borda_esquerda = roi_margem[:, 0:margem_minima_px]
-            borda_direita = roi_margem[:, -margem_minima_px:]
-            if (cv2.countNonZero(borda_superior) == 0 or
-                cv2.countNonZero(borda_inferior) == 0 or
-                cv2.countNonZero(borda_esquerda) == 0 or
-                cv2.countNonZero(borda_direita) == 0):
-                margem_ok = False
-        else:
-            largura_mm, altura_mm, margem_ok = 0, 0, False
+        # ----------------- Nossa análise substituindo a antiga -----------------
+        largura_mm, altura_mm = analisar_imagem(frame)
+        margem_ok = True  # manter flag, pode ser ajustada se precisar
         # ----------------------------------------------------------------------
 
         conexao = conectar_banco()
@@ -189,7 +177,7 @@ def process_image_file(image_path, anotacao, gemini_obs, amostra_retirada_flag, 
         gemini_result = analisar_com_gemini(largura_mm, altura_mm, margem_ok, gemini_obs, amostra_retirada_flag)
 
         inserir_print(conexao, frame, int(user_id) if user_id else None,
-                      mm_per_pixel_x, mm_per_pixel_y, anotacao, gemini_result,
+                      largura_mm, altura_mm, anotacao, gemini_result,
                       paciente_id=paciente_id)
 
         try: conexao.close()
