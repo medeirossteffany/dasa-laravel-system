@@ -103,7 +103,7 @@ export default function CameraCapture({ onClose }) {
 
   const send = async () => {
     if (!capturedBlob) { showToast("Capture uma imagem primeiro!"); return; }
-    if (amostraRetirada && !cpf) { showToast("Informe CPF!"); return; }
+    if (!cpf) { showToast("Informe CPF!"); return; }
 
     setLoading(true);
     try {
