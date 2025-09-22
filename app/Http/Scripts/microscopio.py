@@ -145,7 +145,7 @@ def analisar_com_gemini(largura_mm, altura_mm, observacoes):
         traceback.print_exc(file=sys.stderr)
         return ""
 
-def process_image_file(image_path, anotacao, gemini_obs, amostra_retirada_flag, cpf, user_id, user_name):
+def process_image_file(image_path, anotacao, gemini_obs, cpf, user_id, user_name):
 
 
 
@@ -172,7 +172,7 @@ def process_image_file(image_path, anotacao, gemini_obs, amostra_retirada_flag, 
         paciente_id = buscar_paciente_por_cpf(conexao, cpf)
         
 
-        gemini_result = analisar_com_gemini(largura_mm, altura_mm, gemini_obs, amostra_retirada_flag)
+        gemini_result = analisar_com_gemini(largura_mm, altura_mm, gemini_obs)
 
         inserir_print(conexao, frame, int(user_id) if user_id else None,
                       largura_mm, altura_mm, anotacao, gemini_result,
