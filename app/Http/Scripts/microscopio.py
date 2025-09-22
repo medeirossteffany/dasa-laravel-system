@@ -50,45 +50,45 @@ def buscar_paciente_por_cpf(conexao, cpf_str):
         return row['ID_PACIENTE'] if row else None
 
 def analisar_imagem(frame):
-    # Converte para escala de cinza
+    
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # Binarização
+    
     _, threshold = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
 
-    # Kernel para morfologia
+ 
     kernel = np.ones((5,5), np.uint8)
 
-    # Erosão
+
     dilation = cv2.erode(threshold, kernel, iterations=1)
 
-    # Contornos
+    
     contours, _ = cv2.findContours(dilation, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     if len(contours) < 2:
         print("Não foram encontrados contornos suficientes.")
         return 0, 0
 
-    # Ordena contornos por área (maior → menor)
+   
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
-    # Pega o segundo maior contorno
+    
     c = contours[1]
     x, y, w, h = cv2.boundingRect(c)
 
-    mmx = round(((w*1)/451)*10, 2)   # largura em mm
-    mmy = round((h*10)/371, 2)      # altura em mm
+    mmx = round(((w*1.8)/70), 2)   
+    mmy = round((h*10)/301, 2)      
 
-    # Desenha o retângulo
+    
     cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
-    # Escreve as medidas na imagem
+    
     cv2.putText(frame, f"L: {mmx} mm", (x, y-20),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
     cv2.putText(frame, f"A: {mmy} mm", (x, y-50),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
-    # Salva imagem com resultado
+    
     cv2.imwrite("resultado.jpg", frame)
 
     return mmx, mmy
@@ -104,7 +104,7 @@ def inserir_print(conexao, frame, id_usuario, largura, altura,
             imagem_binaria = f.read()
         data_atual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # Note que largura e altura já foram calculadas no frame
+       
         colunas = ["IMAGEM_AMOSTRA", "ALTURA_AMOSTRA", "LARGURA_AMOSTRA",
                    "DATA_AMOSTRA", "MEDICO_USUARIO_ID_USUARIO",
                    "ANOTACAO_MEDICO_AMOSTRA", "ANOTACAO_IA_AMOSTRA"]
@@ -166,13 +166,18 @@ def process_image_file(image_path, anotacao, gemini_obs, amostra_retirada_flag, 
             return 3
 
 
+        cpf = cpf.strip().replace('.', '').replace('-', '')
+        print(cpf)
+
         # ----------------- Nossa análise substituindo a antiga -----------------
         largura_mm, altura_mm = analisar_imagem(frame)
         margem_ok = True  # manter flag, pode ser ajustada se precisar
         # ----------------------------------------------------------------------
 
         conexao = conectar_banco()
-        paciente_id = buscar_paciente_por_cpf(conexao, cpf) if amostra_retirada_flag and cpf else None
+
+        paciente_id = buscar_paciente_por_cpf(conexao, cpf)
+        
 
         gemini_result = analisar_com_gemini(largura_mm, altura_mm, margem_ok, gemini_obs, amostra_retirada_flag)
 
@@ -201,6 +206,7 @@ def parse_args_and_run():
     parser.add_argument('--user-id', default='')
     parser.add_argument('--user-name', default='')
     args = parser.parse_args()
+
 
     rc = process_image_file(args.image, args.anotacao, args.gemini_obs,
                             args.amostra_retirada=='1', args.cpf,

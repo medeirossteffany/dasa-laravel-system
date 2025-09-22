@@ -25,7 +25,7 @@ export default function NewPatientModal({ open, onClose, onCreated }) {
       setErrors({ data_nascimento: 'Data de nascimento não pode ser futura' });
       return;
     }
-
+    
     router.post('/dashboard', {
       nome,
       cpf,
