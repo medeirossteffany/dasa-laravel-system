@@ -15,7 +15,6 @@ class MicroscopioController extends Controller
                 'imagem' => 'required|image|max:10240',
                 'anotacao' => 'nullable|string|max:2000',
                 'gemini_obs' => 'nullable|string|max:2000',
-                'amostra_retirada' => 'nullable|in:0,1',
                 'cpf' => 'nullable|string|max:20',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -46,13 +45,12 @@ class MicroscopioController extends Controller
 
             // Montando o comando
             $cmd = sprintf(
-                '%s %s --image %s --anotacao %s --gemini_obs %s --amostra_retirada %s --cpf %s --user-id %s --user-name %s',
+                '%s %s --image %s --anotacao %s --gemini_obs %s --cpf %s --user-id %s --user-name %s',
                 escapeshellarg($venvPython),
                 escapeshellarg($script),
                 escapeshellarg($path),
                 escapeshellarg($request->input('anotacao', '')),
                 escapeshellarg($request->input('gemini_obs', '')),
-                escapeshellarg($request->input('amostra_retirada', '0')),
                 escapeshellarg($request->input('cpf', '')),
                 escapeshellarg((string) optional($request->user())->id ?: ''),
                 escapeshellarg((string) optional($request->user())->name ?: '')

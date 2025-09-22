@@ -49,49 +49,42 @@ def buscar_paciente_por_cpf(conexao, cpf_str):
         row = cursor.fetchone()
         return row['ID_PACIENTE'] if row else None
 
-def analisar_imagem(frame):
-    
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+def analisar_imagem_colorida(frame):
+    # Escala de medidas
+    mm_per_pixel_x, mm_per_pixel_y = 1.8/70, 10/301
 
-    
-    _, threshold = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
+    # Detecta amostra vermelha
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    lower_red1 = np.array([0, 120, 70])
+    upper_red1 = np.array([10, 255, 255])
+    lower_red2 = np.array([170, 120, 70])
+    upper_red2 = np.array([180, 255, 255])
+    mask_red = cv2.inRange(hsv, lower_red1, upper_red1) | cv2.inRange(hsv, lower_red2, upper_red2)
 
- 
-    kernel = np.ones((5,5), np.uint8)
+    contours_red, _ = cv2.findContours(mask_red, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours_red:
+        return 0, 0  # Nenhuma amostra detectada
 
+    c_red = max(contours_red, key=cv2.contourArea)
+    x, y, w, h = cv2.boundingRect(c_red)
 
-    dilation = cv2.erode(threshold, kernel, iterations=1)
+    largura_mm = round(w * mm_per_pixel_x, 2)
+    altura_mm = round(h * mm_per_pixel_y, 2)
 
-    
-    contours, _ = cv2.findContours(dilation, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # Desenha bounding box da amostra em verde
+    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-    if len(contours) < 2:
-        print("Não foram encontrados contornos suficientes.")
-        return 0, 0
+    # Detecta margem preta
+    lower_black = np.array([0, 0, 0])
+    upper_black = np.array([180, 255, 50])
+    mask_black = cv2.inRange(hsv, lower_black, upper_black)
+    contours_black, _ = cv2.findContours(mask_black, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(frame, contours_black, -1, (255, 0, 0), 2)
 
-   
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)
-
-    
-    c = contours[1]
-    x, y, w, h = cv2.boundingRect(c)
-
-    mmx = round(((w*1.8)/70), 2)   
-    mmy = round((h*10)/301, 2)      
-
-    
-    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-
-    
-    cv2.putText(frame, f"L: {mmx} mm", (x, y-20),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
-    cv2.putText(frame, f"A: {mmy} mm", (x, y-50),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
-
-    
+    # Salva a imagem processada para interação manual do profissional
     cv2.imwrite("resultado.jpg", frame)
 
-    return mmx, mmy
+    return largura_mm, altura_mm
 
 def inserir_print(conexao, frame, id_usuario, largura, altura,
                   anotacao_medico, gemini_result, paciente_id=None):
@@ -131,20 +124,18 @@ def inserir_print(conexao, frame, id_usuario, largura, altura,
         traceback.print_exc(file=sys.stderr)
         raise
 
-def analisar_com_gemini(largura_mm, altura_mm, margem_ok, observacoes, amostra_retirada):
+def analisar_com_gemini(largura_mm, altura_mm, observacoes):
     if not api_key:
         print("GEMINI_API_KEY não configurada. Pulando Gemini", file=sys.stderr)
         return ""
     try:
-        local = "Análise em amostra retirada do paciente" if amostra_retirada else "Análise direta no corpo do paciente"
-        margem_texto = f"- Margem: {'OK' if margem_ok else 'Insuficiente'}\n" if amostra_retirada else ""
+        
         prompt = (
-            f"{local}\n"
+            "Você é um assistente médico especializado em análise de imagens de microscópio.\n"
+            "Com base nas seguintes medidas da amostra, forneça uma análise clínica resumida e recomendações.\n"
             f"Largura: {largura_mm:.2f} mm\n"
             f"Altura: {altura_mm:.2f} mm\n"
-            f"{margem_texto}"
             f"Observações médicas: {observacoes}\n"
-            "Forneça análise clínica resumida e recomendações."
         )
         model = genai.GenerativeModel(model_name='gemini-2.5-pro')
         response = model.generate_content(prompt)
@@ -155,6 +146,9 @@ def analisar_com_gemini(largura_mm, altura_mm, margem_ok, observacoes, amostra_r
         return ""
 
 def process_image_file(image_path, anotacao, gemini_obs, amostra_retirada_flag, cpf, user_id, user_name):
+
+
+
     try:
         if not os.path.isfile(image_path):
             print(f"Arquivo não encontrado: {image_path}", file=sys.stderr)
@@ -167,11 +161,10 @@ def process_image_file(image_path, anotacao, gemini_obs, amostra_retirada_flag, 
 
 
         cpf = cpf.strip().replace('.', '').replace('-', '')
-        print(cpf)
+        
 
         # ----------------- Nossa análise substituindo a antiga -----------------
-        largura_mm, altura_mm = analisar_imagem(frame)
-        margem_ok = True  # manter flag, pode ser ajustada se precisar
+        largura_mm, altura_mm = analisar_imagem_colorida(frame)
         # ----------------------------------------------------------------------
 
         conexao = conectar_banco()
@@ -179,7 +172,7 @@ def process_image_file(image_path, anotacao, gemini_obs, amostra_retirada_flag, 
         paciente_id = buscar_paciente_por_cpf(conexao, cpf)
         
 
-        gemini_result = analisar_com_gemini(largura_mm, altura_mm, margem_ok, gemini_obs, amostra_retirada_flag)
+        gemini_result = analisar_com_gemini(largura_mm, altura_mm, gemini_obs, amostra_retirada_flag)
 
         inserir_print(conexao, frame, int(user_id) if user_id else None,
                       largura_mm, altura_mm, anotacao, gemini_result,
@@ -201,15 +194,14 @@ def parse_args_and_run():
     parser.add_argument('--image', required=True, help='Caminho para o arquivo de imagem (png/jpg)')
     parser.add_argument('--anotacao', default='')
     parser.add_argument('--gemini_obs', default='')
-    parser.add_argument('--amostra_retirada', default='0')
     parser.add_argument('--cpf', default='')
     parser.add_argument('--user-id', default='')
     parser.add_argument('--user-name', default='')
     args = parser.parse_args()
-
+    
 
     rc = process_image_file(args.image, args.anotacao, args.gemini_obs,
-                            args.amostra_retirada=='1', args.cpf,
+                             args.cpf,
                             args.user_id, args.user_name)
     sys.exit(rc)
 

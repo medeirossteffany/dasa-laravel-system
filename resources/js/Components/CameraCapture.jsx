@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import { usePage } from '@inertiajs/react';
 
+
+
 export default function CameraCapture({ onClose }) {
   const { auth } = usePage().props;
   const userId = auth?.user?.id;
@@ -12,7 +14,6 @@ export default function CameraCapture({ onClose }) {
   const [toastMessage, setToastMessage] = useState("");
   const [anotacao, setAnotacao] = useState('');
   const [geminiObs, setGeminiObs] = useState('');
-  const [amostraRetirada, setAmostraRetirada] = useState(false);
   const [cpf, setCpf] = useState('');
   const [loading, setLoading] = useState(false);
   const [devices, setDevices] = useState([]);
@@ -110,7 +111,6 @@ export default function CameraCapture({ onClose }) {
       formData.append('imagem', capturedBlob, `amostra_${Date.now()}.png`);
       formData.append('anotacao', anotacao || '');
       formData.append('gemini_obs', geminiObs || '');
-      formData.append('amostra_retirada', amostraRetirada ? '1' : '0');
       formData.append('cpf', cpf || '');
       formData.append('user_id', userId || '');
       const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -206,7 +206,7 @@ export default function CameraCapture({ onClose }) {
               onChange={(e) => setAnotacao(e.target.value)}
               className="w-full rounded border px-3 py-2"
             />
-
+            
             <label className="text-sm font-medium text-gray-700">Informações adicionais (Gemini)</label>
             <input
               value={geminiObs}
@@ -214,15 +214,6 @@ export default function CameraCapture({ onClose }) {
               className="w-full rounded border px-3 py-2"
             />
 
-            <label className="flex items-center gap-2 mt-2">
-              <input
-                type="checkbox"
-                checked={amostraRetirada}
-                onChange={(e) => setAmostraRetirada(e.target.checked)}
-                className="h-4 w-4"
-              />
-              <span className="text-gray-700 text-sm">A amostra já foi retirada</span>
-            </label>
 
             {/* CPF fixo, sempre obrigatório */}
             <label className="text-sm font-medium text-gray-700 mt-2">CPF do paciente</label>
