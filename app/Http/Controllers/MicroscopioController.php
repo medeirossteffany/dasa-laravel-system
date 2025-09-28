@@ -41,7 +41,7 @@ class MicroscopioController extends Controller
                 }
             }
 
-            $script = base_path('app/Http/Scripts/microscopio.py');
+            $script = base_path('app/Http/Scripts/mensureScript/microscopio.py');
 
             // Montando o comando
             $cmd = sprintf(
