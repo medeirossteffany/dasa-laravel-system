@@ -1,8 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { usePage } from '@inertiajs/react';
 
-
-
 export default function CameraCapture({ onClose }) {
   const { auth } = usePage().props;
   const userId = auth?.user?.id;
@@ -20,10 +18,7 @@ export default function CameraCapture({ onClose }) {
   const [selectedDeviceId, setSelectedDeviceId] = useState(null);
 
   useEffect(() => {
-
-
     let mounted = true;
-
     async function fetchCameras() {
       try {
         const allDevices = await navigator.mediaDevices.enumerateDevices();
@@ -34,19 +29,16 @@ export default function CameraCapture({ onClose }) {
         console.error("Erro ao listar câmeras:", err);
       }
     }
-
     fetchCameras();
-
     return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
     if (!selectedDeviceId) return;
     let mounted = true;
-
     async function startCamera() {
       try {
-        stopStream(); // para stream atual
+        stopStream();
         const s = await navigator.mediaDevices.getUserMedia({ 
           video: { deviceId: { exact: selectedDeviceId }, width: 640, height: 480 } 
         });
@@ -61,9 +53,7 @@ export default function CameraCapture({ onClose }) {
         alert("Não foi possível acessar a câmera.");
       }
     }
-
     startCamera();
-
     return () => { mounted = false; };
   }, [selectedDeviceId]);
 
@@ -101,8 +91,21 @@ export default function CameraCapture({ onClose }) {
     }, 'image/png', 0.95);
   };
 
+  const handleUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setCapturedBlob(file);
+
+    // Se já havia câmera aberta, fecha
+    stopStream();
+  };
+
   const send = async () => {
-    if (!capturedBlob) { showToast("Capture uma imagem primeiro!"); return; }
+    if (!capturedBlob) { showToast("Capture ou faça upload de uma imagem primeiro!"); return; }
     if (!cpf) { showToast("Informe CPF!"); return; }
 
     setLoading(true);
@@ -158,8 +161,6 @@ export default function CameraCapture({ onClose }) {
 
         <div className="flex flex-col lg:flex-row gap-4 p-5">
           <div className="lg:flex-1 flex flex-col items-center gap-3">
-            
-
             <div className="bg-black w-full h-96 rounded-md flex items-center justify-center overflow-hidden">
               {!previewUrl ? (
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
@@ -167,6 +168,15 @@ export default function CameraCapture({ onClose }) {
                 <img src={previewUrl} alt="preview" className="w-full h-full object-cover" />
               )}
             </div>
+
+            {/* Upload de imagem */}
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleUpload} 
+              className="mb-2 border rounded px-3 py-2 w-full max-w-xs"
+            />
+
             {/* Dropdown de câmeras */}
             {devices.length > 0 && (
               <select 
@@ -179,6 +189,7 @@ export default function CameraCapture({ onClose }) {
                 ))}
               </select>
             )}
+            
             <div className="flex gap-3">
               <button
                 onClick={capture}
@@ -195,7 +206,6 @@ export default function CameraCapture({ onClose }) {
               >
                 {loading ? 'Enviando...' : 'Salvar e Processar'}
               </button>
-              
             </div>
           </div>
 
@@ -214,8 +224,6 @@ export default function CameraCapture({ onClose }) {
               className="w-full rounded border px-3 py-2"
             />
 
-
-            {/* CPF fixo, sempre obrigatório */}
             <label className="text-sm font-medium text-gray-700 mt-2">CPF do paciente</label>
             <input
               value={cpf}
@@ -228,7 +236,6 @@ export default function CameraCapture({ onClose }) {
         </div>
         <canvas ref={canvasRef} style={{ display: 'none' }} />
       </div>
-      {/* Toast */}
       {toastMessage && (
         <div className="fixed top-5 right-5 px-4 py-2 rounded shadow-lg text-white bg-red-500 transition-transform transform">
           {toastMessage}

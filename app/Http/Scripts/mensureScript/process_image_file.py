@@ -27,7 +27,7 @@ def process_image_file(image_path, anotacao, gemini_obs, cpf, user_id, user_name
         
 
         # ----------------- Nossa análise substituindo a antiga -----------------
-        largura_mm, altura_mm = analisar_imagem_colorida(frame)
+        largura_mm, altura_mm, frame = analisar_imagem_colorida(frame)
         # ----------------------------------------------------------------------
 
         conexao = conectar_banco()
@@ -36,6 +36,7 @@ def process_image_file(image_path, anotacao, gemini_obs, cpf, user_id, user_name
         
 
         gemini_result = analisar_com_gemini(largura_mm, altura_mm, gemini_obs)
+
 
         inserir_print(conexao, frame, int(user_id) if user_id else None,
                       largura_mm, altura_mm, anotacao, gemini_result,
