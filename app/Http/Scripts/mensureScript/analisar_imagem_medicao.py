@@ -6,7 +6,7 @@ def analisar_imagem_colorida(frame, salvar_resultado=True, caminho_saida="result
     frame = cv2.resize(frame, (640, 480))
     
     # Calibração mm/pixel (ajuste conforme sua régua)
-    mm_per_pixel_x, mm_per_pixel_y = 1.8/70, 10/301  
+    mm_per_pixel_x, mm_per_pixel_y = 1.85/413, 1.1/351
 
     # Convertendo para HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -53,8 +53,8 @@ def analisar_imagem_colorida(frame, salvar_resultado=True, caminho_saida="result
     # Desenhar contorno e retângulo na amostra detectada
     cv2.drawContours(frame, [c], -1, (0, 0, 255), 2)  # contorno em vermelho
     cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)  # retângulo em azul
-    cv2.putText(frame, f"L: {mmx} mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
-    cv2.putText(frame, f"A: {mmy} mm", (x, y - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+    cv2.putText(frame, f"L: {mmx} mm", (x - 10, y + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+    cv2.putText(frame, f"A: {mmy} mm", (x - 25, y + 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
     # Salvar imagem com resultado
     if salvar_resultado:

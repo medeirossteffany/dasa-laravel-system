@@ -103,7 +103,7 @@ export default function SampleDetailsModal({ open, onClose, sample = {} }) {
       const dx = line.x2 - line.x1;
       const dy = line.y2 - line.y1;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const scale = 8.41/274;
+      const scale = 1.85/461;
       
       // -------- Aqui você pode calibrar a medição convertendo px para mm/cm
       const calibratedDist = dist * scale; // <- ajuste conforme necessário
